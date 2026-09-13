@@ -299,9 +299,9 @@
         ];
 
         let villagers = [
-            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle' },
-            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle' },
-            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle' }
+            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
+            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
+            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle', lastGatherTime: 0 }
         ];
 
         let selectedVillager = null;
@@ -410,6 +410,7 @@
         }
 
         function updateVillagers() {
+            const now = Date.now();
             villagers.forEach(v => {
                 let dx = v.targetX - v.x;
                 let dy = v.targetY - v.y;
@@ -422,13 +423,13 @@
                     v.x = v.targetX;
                     v.y = v.targetY;
 
-                    if (v.state === 'moving_to_tree') {
-                        v.state = 'gathering';
-                        setTimeout(() => {
+                    // Si está talando, cada 10 segundos (10000ms) suma 10 de madera infinitamente
+                    if (v.state === 'gathering') {
+                        if (now - v.lastGatherTime >= 10000) {
                             woodCount += 10;
                             woodDisplay.innerText = woodCount;
-                            v.state = 'idle';
-                        }, 2500);
+                            v.lastGatherTime = now;
+                        }
                     }
                 }
             });
@@ -532,18 +533,19 @@
             });
 
             if (selectedBuildType === null) {
-                // 1. Si hacemos clic en un árbol teniendo un aldeano seleccionado, mandarlo a talar
+                // 1. Si hacemos clic en un árbol teniendo un aldeano seleccionado, mandarlo a talar en bucle
                 if (selectedVillager && clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
                     if (mapGrid[clickedIso.y][clickedIso.x] === 4) {
                         selectedVillager.targetX = clickedIso.x;
                         selectedVillager.targetY = clickedIso.y;
-                        selectedVillager.state = 'moving_to_tree';
+                        selectedVillager.state = 'gathering';
+                        selectedVillager.lastGatherTime = Date.now(); // Empezar a contar el ciclo de tala
                         selectedVillager = null;
                         return;
                     }
                 }
 
-                // 2. Si no hay árbol o queremos cambiar de selección, comprobar si pinchamos un aldeano
+                // 2. Comprobar si pinchamos un aldeano para seleccionarlo
                 let clickedVillager = villagers.find(v => {
                     const screen = isoToScreen(v.x, v.y);
                     return Math.hypot(mousePos.x - screen.x, mousePos.y - (screen.y + 4 * zoom)) < 20 * zoom;
@@ -553,7 +555,7 @@
                     selectedVillager = clickedVillager;
                     return;
                 } else {
-                    selectedVillager = null; // Deseleccionar si hace clic al vacío
+                    selectedVillager = null;
                 }
             }
 
