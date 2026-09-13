@@ -200,7 +200,7 @@
 
         <div class="ui-build-menu">
             <button class="build-btn" onclick="selectBuildOption(null)">
-                <span>🔍</span> Navegar / Seleccionar
+                <span>🔍</span> Seleccionar / Aldeanos
             </button>
             <button class="build-btn" id="btn-build-2" onclick="selectBuildOption(2)">
                 <span>🏛️</span> Ayuntamiento
@@ -234,9 +234,6 @@
         const canvas = document.getElementById('isometricCanvas');
         const ctx = canvas.getContext('2d');
 
-        // =========================================================================
-        // CONFIGURACIÓN DE ASSETS / GRÁFICOS
-        // =========================================================================
         const ASSETS_CONFIG = {
             tree: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><ellipse cx="50" cy="110" rx="32" ry="11" fill="rgba(0,0,0,0.3)"/><path d="M46 75 L46 105 L54 105 L54 75 Z" fill="%235c3a21"/><circle cx="50" cy="45" r="32" fill="%23065f46"/><circle cx="38" cy="55" r="24" fill="%23047857"/><circle cx="62" cy="55" r="24" fill="%23047857"/><circle cx="50" cy="30" r="22" fill="%2310b981"/></svg>',
             townhall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160"><ellipse cx="70" cy="142" rx="60" ry="16" fill="rgba(0,0,0,0.35)"/><path d="M70 15 L130 45 L70 75 L10 45 Z" fill="%231e293b"/><path d="M10 45 L70 75 L70 135 L10 105 Z" fill="%230f172a"/><path d="M70 75 L130 45 L130 105 L70 135 Z" fill="%231e293b"/><polygon points="70,0 80,20 70,25 60,20" fill="%2300f0ff"/></svg>',
@@ -258,7 +255,6 @@
         }
         initAssets();
 
-        // Estado del Juego
         let cryptoTokens = 120;
         let elixirTokens = 45;
         let woodCount = 0;
@@ -302,11 +298,10 @@
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ];
 
-        // Aldeanos con coordenadas isométricas reales y sistema de tareas
         let villagers = [
-            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.03, state: 'idle', taskTarget: null },
-            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.03, state: 'idle', taskTarget: null },
-            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.03, state: 'idle', taskTarget: null }
+            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle' },
+            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle' },
+            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle' }
         ];
 
         let selectedVillager = null;
@@ -416,7 +411,6 @@
 
         function updateVillagers() {
             villagers.forEach(v => {
-                // Movimiento suave hacia el destino
                 let dx = v.targetX - v.x;
                 let dy = v.targetY - v.y;
                 let dist = Math.hypot(dx, dy);
@@ -431,12 +425,10 @@
                     if (v.state === 'moving_to_tree') {
                         v.state = 'gathering';
                         setTimeout(() => {
-                            // Al terminar de talar, da recursos y vuelve a estar libre
                             woodCount += 10;
                             woodDisplay.innerText = woodCount;
                             v.state = 'idle';
-                            v.taskTarget = null;
-                        }, 2500); // 2.5 segundos cortando madera
+                        }, 2500);
                     }
                 }
             });
@@ -445,13 +437,11 @@
         function drawVillager(v) {
             const screen = isoToScreen(v.x, v.y);
 
-            // Sombra
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.beginPath();
             ctx.ellipse(screen.x, screen.y + (TILE_HEIGHT / 2) * zoom, 8 * zoom, 4 * zoom, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Cuerpo del aldeano (punto naranja característico)
             ctx.fillStyle = '#f59e0b';
             ctx.beginPath();
             ctx.arc(screen.x, screen.y + 4 * zoom, 6 * zoom, 0, Math.PI * 2);
@@ -460,7 +450,6 @@
             ctx.lineWidth = 1.5 * zoom;
             ctx.stroke();
 
-            // Indicador si está seleccionado
             if (selectedVillager === v) {
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 2 * zoom;
@@ -469,7 +458,6 @@
                 ctx.stroke();
             }
 
-            // Si está talando, mostrar icono animado
             if (v.state === 'gathering') {
                 ctx.font = `12px sans-serif`;
                 ctx.fillStyle = '#38bdf8';
@@ -521,7 +509,6 @@
         canvas.addEventListener('click', (e) => {
             const clickedIso = screenToIso(mousePos.x, mousePos.y);
 
-            // 1. Recoger fichas flotantes
             floatingTokens.forEach(token => {
                 if (!token.collected) {
                     const screen = isoToScreen(token.x, token.y);
@@ -544,8 +531,19 @@
                 }
             });
 
-            // 2. Seleccionar aldeano o mandarlo a talar si hay uno seleccionado
             if (selectedBuildType === null) {
+                // 1. Si hacemos clic en un árbol teniendo un aldeano seleccionado, mandarlo a talar
+                if (selectedVillager && clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
+                    if (mapGrid[clickedIso.y][clickedIso.x] === 4) {
+                        selectedVillager.targetX = clickedIso.x;
+                        selectedVillager.targetY = clickedIso.y;
+                        selectedVillager.state = 'moving_to_tree';
+                        selectedVillager = null;
+                        return;
+                    }
+                }
+
+                // 2. Si no hay árbol o queremos cambiar de selección, comprobar si pinchamos un aldeano
                 let clickedVillager = villagers.find(v => {
                     const screen = isoToScreen(v.x, v.y);
                     return Math.hypot(mousePos.x - screen.x, mousePos.y - (screen.y + 4 * zoom)) < 20 * zoom;
@@ -554,21 +552,11 @@
                 if (clickedVillager) {
                     selectedVillager = clickedVillager;
                     return;
-                }
-
-                // Si ya teníamos un aldeano seleccionado y hacemos clic en un árbol (tile tipo 4)
-                if (selectedVillager && clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
-                    if (mapGrid[clickedIso.y][clickedIso.x] === 4) {
-                        selectedVillager.targetX = clickedIso.x;
-                        selectedVillager.targetY = clickedIso.y;
-                        selectedVillager.state = 'moving_to_tree';
-                        selectedVillager = null; // Deseleccionar tras dar la orden
-                        return;
-                    }
+                } else {
+                    selectedVillager = null; // Deseleccionar si hace clic al vacío
                 }
             }
 
-            // 3. Modo construcción de edificios
             if (selectedBuildType !== null) {
                 if (clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
                     if (mapGrid[clickedIso.y][clickedIso.x] === 0) {
@@ -645,10 +633,8 @@
             animationFrame++;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Actualizar posiciones de aldeanos
             updateVillagers();
 
-            // Dibujar mapa isométrico y edificios
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
                     const tileType = mapGrid[y][x];
