@@ -2,53 +2,781 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Age of Mons</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age of Mons - Motor Isométrico</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { 
-            background: #111; 
-            color: #fff; 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding-top: 50px; 
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Press+Start+2P&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            overflow: hidden;
+            background-color: #080d14;
+            color: #e6edf3;
         }
-        .hud { 
-            background: #222; 
-            display: inline-block; 
-            padding: 20px 40px; 
-            border-radius: 8px; 
-            border: 2px solid #444;
-            font-size: 20px;
+
+        /* Scrollbars custom */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+        #gameCanvas {
+            cursor: grab;
+            touch-action: none;
         }
-        .resource { margin: 0 10px; font-weight: bold; color: #f39c12; }
+        #gameCanvas:active {
+            cursor: grabbing;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-panel-gold {
+            background: rgba(24, 20, 10, 0.92);
+            border: 1px solid rgba(234, 179, 8, 0.35);
+            box-shadow: 0 0 25px rgba(234, 179, 8, 0.12);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-45px) scale(1.2); }
+        }
+        .float-text {
+            animation: floatUp 1.2s ease-out forwards;
+            position: absolute;
+            pointer-events: none;
+            font-weight: 800;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+        }
     </style>
 </head>
-<body>
+<body class="h-screen w-screen flex flex-col relative overflow-hidden bg-slate-950 text-slate-100">
 
-    <h1>Age of Mons - Aldea de Seoki</h1>
-    <p>Construye, gestiona y haz crecer tu imperio.</p>
+    <!-- HUD BARRA SUPERIOR -->
+    <header class="h-16 glass-panel border-b border-slate-800 px-4 flex items-center justify-between z-20 shrink-0">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20">
+                <i data-lucide="castle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-base tracking-wide bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 bg-clip-text text-transparent leading-none">AGE OF MONS</h1>
+                <span class="text-[10px] text-amber-400/80 font-semibold uppercase tracking-widest">Motor de Aldea Isométrico</span>
+            </div>
+        </div>
 
-    <div class="hud" id="game-hud">
-        Cargando aldea...
+        <!-- Recursos -->
+        <div class="hidden md:flex items-center gap-5 bg-slate-900/90 px-5 py-2 rounded-xl border border-slate-800">
+            <!-- Oro -->
+            <div class="flex items-center gap-2.5" title="Oro acumulado">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                    <i data-lucide="coins" class="w-4 h-4"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider">ORO</span>
+                    <span id="goldCount" class="text-sm font-extrabold text-amber-300 leading-none">1,000</span>
+                </div>
+            </div>
+            <div class="h-6 w-px bg-slate-800"></div>
+
+            <!-- Madera -->
+            <div class="flex items-center gap-2.5" title="Madera acumulada">
+                <div class="w-8 h-8 rounded-lg bg-amber-700/20 border border-amber-700/40 flex items-center justify-center text-amber-600">
+                    <i data-lucide="trees" class="w-4 h-4"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider">MADERA</span>
+                    <span id="woodCount" class="text-sm font-extrabold text-amber-500 leading-none">1,000</span>
+                </div>
+            </div>
+            <div class="h-6 w-px bg-slate-800"></div>
+
+            <!-- Comida -->
+            <div class="flex items-center gap-2.5" title="Comida acumulada">
+                <div class="w-8 h-8 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400">
+                    <i data-lucide="utensils" class="w-4 h-4"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider">COMIDA</span>
+                    <span id="foodCount" class="text-sm font-extrabold text-orange-300 leading-none">1,000</span>
+                </div>
+            </div>
+            <div class="h-6 w-px bg-slate-800"></div>
+
+            <!-- Gemas -->
+            <div class="flex items-center gap-2.5" title="Gemas Web3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="gem" class="w-4 h-4"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider">GEMAS</span>
+                    <span id="gemCount" class="text-sm font-extrabold text-emerald-300 leading-none">1,000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción y Base de Datos -->
+        <div class="flex items-center gap-2">
+            <button id="toggleGridBtn" class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 hover:bg-slate-700 text-slate-300 transition" title="Ver/Ocultar Rejilla">
+                <i data-lucide="grid" class="w-4 h-4"></i>
+            </button>
+            
+            <button id="openSupabaseBtn" class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-700/50 hover:bg-emerald-900/50 text-emerald-400 transition flex items-center gap-2">
+                <i data-lucide="database" class="w-4 h-4"></i>
+                <span class="text-xs font-bold hidden sm:inline">Supabase OK</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL DEL MOTOR -->
+    <div class="flex-1 relative flex overflow-hidden">
+        
+        <!-- Barra de Herramientas Izquierda -->
+        <aside class="absolute top-4 left-4 z-10 flex flex-col gap-2">
+            <button id="toolSelect" class="tool-btn active w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-amber-400 hover:bg-slate-800/90 transition border-amber-500 border-2" title="Inspeccionar">
+                <i data-lucide="mouse-pointer" class="w-5 h-5"></i>
+                <span class="text-[9px] font-bold mt-0.5">Inspeccionar</span>
+            </button>
+
+            <button id="toolBuild" class="tool-btn w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800/90 transition border-slate-800" title="Construir Edificios">
+                <i data-lucide="hammer" class="w-5 h-5"></i>
+                <span class="text-[9px] font-bold mt-0.5">Construir</span>
+            </button>
+
+            <button id="toolDemolish" class="tool-btn w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-950/40 transition border-slate-800" title="Demoler Edificio">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                <span class="text-[9px] font-bold mt-0.5">Demoler</span>
+            </button>
+
+            <div class="w-8 h-px bg-slate-800 my-1 self-center"></div>
+
+            <button id="zoomInBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white transition" title="Zoom In">
+                <i data-lucide="zoom-in" class="w-4 h-4"></i>
+            </button>
+            <button id="zoomOutBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white transition" title="Zoom Out">
+                <i data-lucide="zoom-out" class="w-4 h-4"></i>
+            </button>
+            <button id="centerCamBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white transition" title="Centrar Cámara">
+                <i data-lucide="crosshair" class="w-4 h-4"></i>
+            </button>
+        </aside>
+
+        <!-- CANVAS DEL JUEGO -->
+        <main class="w-full h-full relative overflow-hidden bg-slate-950">
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+            <div id="floatingTextContainer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+        </main>
+
+        <!-- MENÚ DE CONSTRUCCIÓN DESPLEGABLE -->
+        <div id="buildMenuDrawer" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-20 glass-panel-gold rounded-2xl p-4 w-[92%] max-w-3xl shadow-2xl transition-all">
+            <div class="flex items-center justify-between mb-3 border-b border-amber-500/20 pb-2">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="boxes" class="w-5 h-5 text-amber-400"></i>
+                    <h3 class="font-extrabold text-sm text-slate-100 uppercase tracking-wide">Catálogo de Edificios</h3>
+                </div>
+                <button id="closeBuildMenu" class="text-slate-400 hover:text-slate-200 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Lista de Edificios -->
+            <div id="buildingCardsList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-h-60 overflow-y-auto p-1">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+
+        <!-- PANEL INSPECTOR LATERAL -->
+        <aside id="inspectorDrawer" class="hidden absolute right-4 top-4 bottom-6 w-80 glass-panel rounded-2xl p-4 z-20 flex-col shadow-2xl border border-slate-800 transition-all">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <div id="inspectorIcon" class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold">
+                        <i data-lucide="castle" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 id="inspectorTitle" class="font-extrabold text-sm text-slate-100 leading-none">Ayuntamiento</h3>
+                        <span id="inspectorCategory" class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Edificio Principal</span>
+                    </div>
+                </div>
+                <button id="closeInspector" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Nivel</span>
+                        <span id="inspectorLevel" class="text-sm font-extrabold text-amber-400">Nivel 1</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Espacio Grilla</span>
+                        <span id="inspectorSize" class="text-sm font-extrabold text-blue-400">4 x 4 Tiles</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <span class="text-[11px] text-slate-300 font-bold uppercase block tracking-wider">Estadísticas</span>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-400">Puntos de Vida (HP):</span>
+                        <span id="inspectorHP" class="font-bold text-emerald-400">2,000 / 2,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 grid grid-cols-1 gap-2 mt-auto">
+                <button id="inspectDemolishBtn" class="py-2.5 px-3 rounded-xl bg-red-950/60 border border-red-700/40 hover:bg-red-900/60 text-xs font-bold text-red-300 flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span>Demoler Edificio</span>
+                </button>
+            </div>
+        </aside>
     </div>
 
-    <!-- Librería de Supabase para la web -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Configuración de conexión a Supabase
-        const SUPABASE_URL = 'https://dmzneqpvcxvvsbiuvsuv.supabase.co'; // (Aquí pondremos tus credenciales reales)
+        /* ==========================================================================
+           CONFIGURACIÓN SUPABASE & CONexIÓN REAL
+           ========================================================================== */
+        const SUPABASE_URL = 'https://dmzneqpvcxvvsbiuvsuv.supabase.co/rest/v1/';
         const SUPABASE_KEY = 'sb_publishable_KPDyDLQ-UNHrqYEgnpZUjw_1VcvWFfk';
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient(
+            'https://dmzneqpvcxvvsbiuvsuv.supabase.co', 
+            SUPABASE_KEY
+        );
 
-        async function initGame() {
-            document.getElementById('game-hud').innerHTML = `
-                <span class="resource">🪙 Oro: 1000</span> 
-                <span class="resource">🪵 Madera: 1000</span> 
-                <span class="resource">🍖 Comida: 1000</span>
-            `;
+        let playerData = { gold: 1000, wood: 1000, food: 1000, gems: 1000 };
+
+        async function syncWithSupabase() {
+            try {
+                let { data, error } = await supabaseClient
+                    .from('players')
+                    .select('*')
+                    .eq('username', 'Seoki')
+                    .single();
+
+                if (error || !data) {
+                    // Si no existe, lo creamos
+                    const { data: newData } = await supabaseClient
+                        .from('players')
+                        .insert([{ username: 'Seoki', gold: 1000, wood: 1000, food: 1000, gems: 1000 }])
+                        .select();
+                    if (newData && newData[0]) playerData = newData[0];
+                } else {
+                    playerData = data;
+                }
+                updateHUD();
+            } catch (err) {
+                console.log("Modo local de respaldo activo");
+            }
         }
 
-        initGame();
+        function updateHUD() {
+            document.getElementById('goldCount').innerText = Number(playerData.gold || 1000).toLocaleString();
+            document.getElementById('woodCount').innerText = Number(playerData.wood || 1000).toLocaleString();
+            document.getElementById('foodCount').innerText = Number(playerData.food || 1000).toLocaleString();
+            document.getElementById('gemCount').innerText = Number(playerData.gems || 1000).toLocaleString();
+        }
+
+        /* ==========================================================================
+           MOTOR ISOMÉTRICO
+           ========================================================================== */
+        const GRID_SIZE = 30;
+        const TILE_WIDTH = 64;
+        const TILE_HEIGHT = 32;
+
+        const BUILDING_CATALOG = [
+            { id: 'townhall', name: 'Ayuntamiento', category: 'town', width: 4, height: 4, color: '#d97706', roofColor: '#b45309', hp: 2000, cost: 0, icon: 'castle' },
+            { id: 'goldmine', name: 'Mina de Oro', category: 'resource', width: 3, height: 3, color: '#eab308', roofColor: '#ca8a04', hp: 800, cost: 300, icon: 'coins' },
+            { id: 'lumberjack', name: 'Aserradero', category: 'resource', width: 3, height: 3, color: '#b45309', roofColor: '#78350f', hp: 750, cost: 300, icon: 'trees' },
+            { id: 'cannon', name: 'Cañón Defensivo', category: 'defense', width: 2, height: 2, color: '#475569', roofColor: '#334155', hp: 600, cost: 250, icon: 'crosshair' },
+            { id: 'wall', name: 'Muro de Piedra', category: 'wall', width: 1, height: 1, color: '#64748b', roofColor: '#475569', hp: 1500, cost: 50, icon: 'square' }
+        ];
+
+        const TERRAIN = { GRASS: 0, WATER: 1, FOREST: 2, ROCK: 3, BORDER: 4 };
+
+        const state = {
+            camera: { x: 0, y: 0, zoom: 1 },
+            isPanning: false,
+            panStart: { x: 0, y: 0 },
+            showGrid: true,
+            activeTool: 'select',
+            selectedBuildingType: null,
+            selectedBuildingInstance: null,
+            hoveredTile: { r: -1, c: -1 },
+            map: [],
+            buildings: []
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function initTerrainMap() {
+            state.map = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(TERRAIN.GRASS));
+            
+            for(let r = 0; r < GRID_SIZE; r++) {
+                for(let c = 0; c < GRID_SIZE; c++) {
+                    if(r < 2 || r >= GRID_SIZE - 2 || c < 2 || c >= GRID_SIZE - 2) {
+                        state.map[r][c] = TERRAIN.BORDER;
+                    }
+                }
+            }
+
+            for(let i = 0; i < 9; i++) {
+                state.map[6 + i][2 + i] = TERRAIN.WATER;
+                state.map[6 + i][3 + i] = TERRAIN.WATER;
+            }
+
+            state.map[4][22] = TERRAIN.FOREST;
+            state.map[5][22] = TERRAIN.FOREST;
+            state.map[22][5] = TERRAIN.ROCK;
+
+            const center = Math.floor(GRID_SIZE / 2) - 2;
+            placeBuilding('townhall', center, center);
+            placeBuilding('goldmine', center - 4, center);
+            placeBuilding('lumberjack', center, center - 4);
+            placeBuilding('cannon', center + 5, center + 1);
+        }
+
+        function placeBuilding(buildingTypeId, r, c) {
+            const bDef = BUILDING_CATALOG.find(b => b.id === buildingTypeId);
+            if(!bDef) return null;
+
+            const instance = {
+                id: 'b_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                buildingId: buildingTypeId,
+                r: r,
+                c: c,
+                w: bDef.width,
+                h: bDef.height,
+                level: 1
+            };
+            state.buildings.push(instance);
+            return instance;
+        }
+
+        function gridToIso(r, c) {
+            return {
+                x: (c - r) * (TILE_WIDTH / 2),
+                y: (c + r) * (TILE_HEIGHT / 2)
+            };
+        }
+
+        function isoToGrid(x, y) {
+            const c = (x / (TILE_WIDTH / 2) + y / (TILE_HEIGHT / 2)) / 2;
+            const r = (y / (TILE_HEIGHT / 2) - x / (TILE_WIDTH / 2)) / 2;
+            return { r: Math.floor(r), c: Math.floor(c) };
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            render();
+        }
+
+        function centerCamera() {
+            const centerIso = gridToIso(GRID_SIZE / 2, GRID_SIZE / 2);
+            state.camera.x = canvas.width / 2 - centerIso.x * state.camera.zoom;
+            state.camera.y = canvas.height / 3 - centerIso.y * state.camera.zoom;
+            render();
+        }
+
+        function render() {
+            if (!state.map || state.map.length === 0) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(state.camera.x, state.camera.y);
+            ctx.scale(state.camera.zoom, state.camera.zoom);
+
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const { x, y } = gridToIso(r, c);
+                    const tileType = state.map[r][c];
+
+                    drawIsometricTile(x, y, getTileColor(tileType, r, c));
+
+                    if (state.showGrid) {
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+
+                    if (tileType === TERRAIN.FOREST) drawTree(x, y);
+                    if (tileType === TERRAIN.ROCK) drawRock(x, y);
+                }
+            }
+
+            const sortedBuildings = [...state.buildings].sort((a, b) => (a.r + a.c) - (b.r + b.c));
+            for (const b of sortedBuildings) {
+                drawDetailedBuilding(b);
+            }
+
+            if (state.activeTool === 'build' && state.selectedBuildingType && state.hoveredTile.r >= 0) {
+                drawPlacementPreview();
+            } else if (state.selectedBuildingInstance && state.activeTool === 'select') {
+                drawSelectionHighlight(state.selectedBuildingInstance);
+            }
+
+            ctx.restore();
+        }
+
+        function getTileColor(type, r, c) {
+            const alt = (r + c) % 2 === 0;
+            switch(type) {
+                case TERRAIN.WATER: return alt ? '#0284c7' : '#0369a1';
+                case TERRAIN.BORDER: return alt ? '#450a0a' : '#7f1d1d';
+                case TERRAIN.FOREST: return alt ? '#14532d' : '#166534';
+                case TERRAIN.ROCK: return alt ? '#334155' : '#475569';
+                default: return alt ? '#15803d' : '#16a34a';
+            }
+        }
+
+        function drawIsometricTile(x, y, color) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + TILE_WIDTH / 2, y + TILE_HEIGHT / 2);
+            ctx.lineTo(x, y + TILE_HEIGHT);
+            ctx.lineTo(x - TILE_WIDTH / 2, y + TILE_HEIGHT / 2);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawTree(x, y) {
+            ctx.fillStyle = '#022c22';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 10, 8, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#15803d';
+            ctx.beginPath();
+            ctx.arc(x, y - 6, 9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#22c55e';
+            ctx.beginPath();
+            ctx.arc(x - 2, y - 9, 6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawRock(x, y) {
+            ctx.fillStyle = '#475569';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 4, 9, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath();
+            ctx.ellipse(x - 2, y + 2, 5, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawDetailedBuilding(b) {
+            const bDef = BUILDING_CATALOG.find(cat => cat.id === b.buildingId);
+            if (!bDef) return;
+
+            const isoTop = gridToIso(b.r, b.c);
+            const isoRight = gridToIso(b.r, b.c + b.w);
+            const isoBottom = gridToIso(b.r + b.h, b.c + b.w);
+            const isoLeft = gridToIso(b.r + b.h, b.c);
+
+            const height3D = b.w * 16 + 12;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.beginPath();
+            ctx.moveTo(isoTop.x + 10, isoTop.y + 10);
+            ctx.lineTo(isoRight.x + 14, isoRight.y + 10);
+            ctx.lineTo(isoBottom.x + 14, isoBottom.y + 10);
+            ctx.lineTo(isoLeft.x + 10, isoLeft.y + 10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = adjustColor(bDef.color, -50);
+            ctx.beginPath();
+            ctx.moveTo(isoLeft.x, isoLeft.y);
+            ctx.lineTo(isoBottom.x, isoBottom.y);
+            ctx.lineTo(isoBottom.x, isoBottom.y - height3D);
+            ctx.lineTo(isoLeft.x, isoLeft.y - height3D);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = adjustColor(bDef.color, -25);
+            ctx.beginPath();
+            ctx.moveTo(isoRight.x, isoRight.y);
+            ctx.lineTo(isoBottom.x, isoBottom.y);
+            ctx.lineTo(isoBottom.x, isoBottom.y - height3D);
+            ctx.lineTo(isoRight.x, isoRight.y - height3D);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = bDef.roofColor;
+            ctx.beginPath();
+            ctx.moveTo(isoTop.x, isoTop.y - height3D);
+            ctx.lineTo(isoRight.x, isoRight.y - height3D);
+            ctx.lineTo(isoBottom.x, isoBottom.y - height3D);
+            ctx.lineTo(isoLeft.x, isoLeft.y - height3D);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            const centerX = (isoTop.x + isoBottom.x) / 2;
+            const centerY = (isoTop.y + isoBottom.y) / 2 - height3D;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px Plus Jakarta Sans';
+            ctx.textAlign = 'center';
+            ctx.fillText(bDef.name, centerX, centerY + 6);
+        }
+
+        function drawSelectionHighlight(b) {
+            const isoTop = gridToIso(b.r, b.c);
+            const isoRight = gridToIso(b.r, b.c + b.w);
+            const isoBottom = gridToIso(b.r + b.h, b.c + b.w);
+            const isoLeft = gridToIso(b.r + b.h, b.c);
+
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(isoTop.x, isoTop.y);
+            ctx.lineTo(isoRight.x, isoRight.y);
+            ctx.lineTo(isoBottom.x, isoBottom.y);
+            ctx.lineTo(isoLeft.x, isoLeft.y);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function drawPlacementPreview() {
+            const bDef = BUILDING_CATALOG.find(cat => cat.id === state.selectedBuildingType);
+            if (!bDef) return;
+
+            const r = state.hoveredTile.r;
+            const c = state.hoveredTile.c;
+            const isValid = canPlaceBuilding(r, c, bDef.width, bDef.height);
+
+            const isoTop = gridToIso(r, c);
+            const isoRight = gridToIso(r, c + bDef.width);
+            const isoBottom = gridToIso(r + bDef.height, c + bDef.width);
+            const isoLeft = gridToIso(r + bDef.height, c);
+
+            ctx.fillStyle = isValid ? 'rgba(34, 197, 94, 0.45)' : 'rgba(239, 68, 68, 0.45)';
+            ctx.strokeStyle = isValid ? '#22c55e' : '#ef4444';
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            ctx.moveTo(isoTop.x, isoTop.y);
+            ctx.lineTo(isoRight.x, isoRight.y);
+            ctx.lineTo(isoBottom.x, isoBottom.y);
+            ctx.lineTo(isoLeft.x, isoLeft.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function canPlaceBuilding(r, c, w, h) {
+            if (r < 2 || c < 2 || r + h > GRID_SIZE - 2 || c + w > GRID_SIZE - 2) return false;
+
+            for (let i = r; i < r + h; i++) {
+                for (let j = c; j < c + w; j++) {
+                    if (state.map[i][j] !== TERRAIN.GRASS) return false;
+                    for (const b of state.buildings) {
+                        if (i >= b.r && i < b.r + b.h && j >= b.c && j < b.c + b.w) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function adjustColor(col, amt) {
+            let num = parseInt(col.replace('#', ''), 16);
+            let r = (num >> 16) + amt;
+            let g = ((num >> 8) & 0x00FF) + amt;
+            let b = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (r<255?r<0?0:r:255)*0x10000 + (g<255?g<0?0:g:255)*0x100 + (b<255?b<0?0:b:255)).toString(16).slice(1);
+        }
+
+        function showFloatText(text, x, y, color) {
+            const el = document.createElement('div');
+            el.className = 'float-text text-sm';
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            el.style.color = color;
+            el.innerText = text;
+            document.getElementById('floatingTextContainer').appendChild(el);
+            setTimeout(() => el.remove(), 1200);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                state.isPanning = true;
+                state.panStart.x = e.clientX - state.camera.x;
+                state.panStart.y = e.clientY - state.camera.y;
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (state.isPanning) {
+                state.camera.x = e.clientX - state.panStart.x;
+                state.camera.y = e.clientY - state.panStart.y;
+                render();
+            } else {
+                const mouseX = (e.clientX - state.camera.x) / state.camera.zoom;
+                const mouseY = (e.clientY - state.camera.y) / state.camera.zoom;
+                state.hoveredTile = isoToGrid(mouseX, mouseY);
+                render();
+            }
+        });
+
+        window.addEventListener('mouseup', () => { state.isPanning = false; });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+            state.camera.zoom = Math.min(Math.max(state.camera.zoom * zoomFactor, 0.5), 2.5);
+            render();
+        }, { passive: false });
+
+        canvas.addEventListener('click', (e) => {
+            const mouseX = (e.clientX - state.camera.x) / state.camera.zoom;
+            const mouseY = (e.clientY - state.camera.y) / state.camera.zoom;
+            const { r, c } = isoToGrid(mouseX, mouseY);
+
+            if (r < 0 || c < 0 || r >= GRID_SIZE || c >= GRID_SIZE) return;
+
+            if (state.activeTool === 'build' && state.selectedBuildingType) {
+                const bDef = BUILDING_CATALOG.find(cat => cat.id === state.selectedBuildingType);
+                if (bDef && canPlaceBuilding(r, c, bDef.width, bDef.height)) {
+                    placeBuilding(state.selectedBuildingType, r, c);
+                    showFloatText(`+1 ${bDef.name}`, e.clientX, e.clientY, '#f59e0b');
+                    render();
+                }
+            } else if (state.activeTool === 'select') {
+                const clicked = state.buildings.find(b => r >= b.r && r < b.r + b.h && c >= b.c && c < b.c + b.w);
+                if (clicked) {
+                    state.selectedBuildingInstance = clicked;
+                    openInspector(clicked);
+                } else {
+                    state.selectedBuildingInstance = null;
+                    closeInspector();
+                }
+                render();
+            } else if (state.activeTool === 'demolish') {
+                const bIndex = state.buildings.findIndex(b => r >= b.r && r < b.r + b.h && c >= b.c && c < b.c + b.w);
+                if (bIndex !== -1) {
+                    state.buildings.splice(bIndex, 1);
+                    showFloatText('Demolido', e.clientX, e.clientY, '#ef4444');
+                    render();
+                }
+            }
+        });
+
+        const toolBtns = document.querySelectorAll('.tool-btn');
+        toolBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                toolBtns.forEach(b => {
+                    b.classList.remove('active', 'border-amber-500', 'border-2', 'text-amber-400');
+                    b.classList.add('border-slate-800', 'text-slate-300');
+                });
+                btn.classList.add('active', 'border-amber-500', 'border-2', 'text-amber-400');
+                
+                if(btn.id === 'toolSelect') state.activeTool = 'select';
+                if(btn.id === 'toolBuild') {
+                    state.activeTool = 'build';
+                    openBuildMenu();
+                }
+                if(btn.id === 'toolDemolish') state.activeTool = 'demolish';
+            });
+        });
+
+        function populateBuildCatalog() {
+            const container = document.getElementById('buildingCardsList');
+            container.innerHTML = '';
+            BUILDING_CATALOG.forEach(b => {
+                const card = document.createElement('div');
+                card.className = `p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 cursor-pointer transition flex flex-col justify-between ${state.selectedBuildingType === b.id ? 'ring-2 ring-amber-400' : ''}`;
+                card.onclick = () => {
+                    state.selectedBuildingType = b.id;
+                    state.activeTool = 'build';
+                    populateBuildCatalog();
+                };
+                card.innerHTML = `
+                    <div class="flex items-center gap-2 mb-1">
+                        <i data-lucide="${b.icon}" class="w-4 h-4 text-amber-400"></i>
+                        <span class="font-bold text-xs text-slate-200 truncate">${b.name}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 flex justify-between">
+                        <span>${b.width}x${b.height} Tiles</span>
+                        <span class="text-amber-300 font-bold">${b.cost} G</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function openBuildMenu() {
+            document.getElementById('buildMenuDrawer').classList.remove('hidden');
+            populateBuildCatalog();
+        }
+
+        document.getElementById('closeBuildMenu').onclick = () => document.getElementById('buildMenuDrawer').classList.add('hidden');
+
+        function openInspector(b) {
+            const bDef = BUILDING_CATALOG.find(cat => cat.id === b.buildingId);
+            if (!bDef) return;
+
+            document.getElementById('inspectorTitle').innerText = bDef.name;
+            document.getElementById('inspectorCategory').innerText = bDef.category.toUpperCase();
+            document.getElementById('inspectorLevel').innerText = `Nivel ${b.level}`;
+            document.getElementById('inspectorSize').innerText = `${b.w} x ${b.h} Tiles`;
+            document.getElementById('inspectorHP').innerText = `${bDef.hp} / ${bDef.hp}`;
+
+            document.getElementById('inspectorDrawer').classList.remove('hidden');
+            document.getElementById('inspectorDrawer').classList.add('flex');
+        }
+
+        function closeInspector() {
+            document.getElementById('inspectorDrawer').classList.add('hidden');
+            document.getElementById('inspectorDrawer').classList.remove('flex');
+        }
+
+        document.getElementById('closeInspector').onclick = closeInspector;
+
+        document.getElementById('inspectDemolishBtn').onclick = () => {
+            if (state.selectedBuildingInstance) {
+                const idx = state.buildings.indexOf(state.selectedBuildingInstance);
+                if (idx !== -1) state.buildings.splice(idx, 1);
+                closeInspector();
+                render();
+            }
+        };
+
+        document.getElementById('toggleGridBtn').onclick = () => { state.showGrid = !state.showGrid; render(); };
+        document.getElementById('zoomInBtn').onclick = () => { state.camera.zoom = Math.min(state.camera.zoom * 1.2, 2.5); render(); };
+        document.getElementById('zoomOutBtn').onclick = () => { state.camera.zoom = Math.max(state.camera.zoom / 1.2, 0.5); render(); };
+        document.getElementById('centerCamBtn').onclick = centerCamera;
+
+        // INICIALIZACIÓN GENERAL
+        initTerrainMap();
+        syncWithSupabase();
+
+        window.onload = () => {
+            lucide.createIcons();
+            resizeCanvas();
+            centerCamera();
+        };
+
+        window.addEventListener('resize', resizeCanvas);
     </script>
 </body>
 </html>
