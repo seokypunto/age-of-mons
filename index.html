@@ -11,7 +11,7 @@
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -21,11 +21,9 @@
             color: #e6edf3;
         }
 
-        /* Scrollbars custom */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 
         #gameCanvas {
             cursor: grab;
@@ -64,7 +62,6 @@
 
     <!-- HUD BARRA SUPERIOR -->
     <header class="h-16 glass-panel border-b border-slate-800 px-4 flex items-center justify-between z-20 shrink-0">
-        <!-- Logo -->
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20">
                 <i data-lucide="castle" class="w-6 h-6"></i>
@@ -75,10 +72,8 @@
             </div>
         </div>
 
-        <!-- Recursos -->
         <div class="hidden md:flex items-center gap-5 bg-slate-900/90 px-5 py-2 rounded-xl border border-slate-800">
-            <!-- Oro -->
-            <div class="flex items-center gap-2.5" title="Oro acumulado">
+            <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
                     <i data-lucide="coins" class="w-4 h-4"></i>
                 </div>
@@ -89,8 +84,7 @@
             </div>
             <div class="h-6 w-px bg-slate-800"></div>
 
-            <!-- Madera -->
-            <div class="flex items-center gap-2.5" title="Madera acumulada">
+            <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-amber-700/20 border border-amber-700/40 flex items-center justify-center text-amber-600">
                     <i data-lucide="trees" class="w-4 h-4"></i>
                 </div>
@@ -101,8 +95,7 @@
             </div>
             <div class="h-6 w-px bg-slate-800"></div>
 
-            <!-- Comida -->
-            <div class="flex items-center gap-2.5" title="Comida acumulada">
+            <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400">
                     <i data-lucide="utensils" class="w-4 h-4"></i>
                 </div>
@@ -113,8 +106,7 @@
             </div>
             <div class="h-6 w-px bg-slate-800"></div>
 
-            <!-- Gemas -->
-            <div class="flex items-center gap-2.5" title="Gemas Web3">
+            <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
                     <i data-lucide="gem" class="w-4 h-4"></i>
                 </div>
@@ -125,171 +117,98 @@
             </div>
         </div>
 
-        <!-- Botones de Acción y Base de Datos -->
         <div class="flex items-center gap-2">
             <button id="toggleGridBtn" class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 hover:bg-slate-700 text-slate-300 transition" title="Ver/Ocultar Rejilla">
                 <i data-lucide="grid" class="w-4 h-4"></i>
             </button>
-            
-            <button id="openSupabaseBtn" class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-700/50 hover:bg-emerald-900/50 text-emerald-400 transition flex items-center gap-2">
+            <button class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-700/50 text-emerald-400 flex items-center gap-2">
                 <i data-lucide="database" class="w-4 h-4"></i>
                 <span class="text-xs font-bold hidden sm:inline">Supabase OK</span>
             </button>
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL DEL MOTOR -->
+    <!-- ÁREA PRINCIPAL -->
     <div class="flex-1 relative flex overflow-hidden">
-        
-        <!-- Barra de Herramientas Izquierda -->
         <aside class="absolute top-4 left-4 z-10 flex flex-col gap-2">
-            <button id="toolSelect" class="tool-btn active w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-amber-400 hover:bg-slate-800/90 transition border-amber-500 border-2" title="Inspeccionar">
+            <button id="toolSelect" class="tool-btn active w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-amber-400 border-amber-500 border-2" title="Inspeccionar">
                 <i data-lucide="mouse-pointer" class="w-5 h-5"></i>
                 <span class="text-[9px] font-bold mt-0.5">Inspeccionar</span>
             </button>
 
-            <button id="toolBuild" class="tool-btn w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800/90 transition border-slate-800" title="Construir Edificios">
+            <button id="toolBuild" class="tool-btn w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-slate-300 hover:text-white border-slate-800" title="Construir">
                 <i data-lucide="hammer" class="w-5 h-5"></i>
                 <span class="text-[9px] font-bold mt-0.5">Construir</span>
             </button>
 
-            <button id="toolDemolish" class="tool-btn w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-950/40 transition border-slate-800" title="Demoler Edificio">
+            <button id="toolDemolish" class="tool-btn w-12 h-12 rounded-xl glass-panel flex flex-col items-center justify-center text-red-400 border-slate-800" title="Demoler">
                 <i data-lucide="trash-2" class="w-5 h-5"></i>
                 <span class="text-[9px] font-bold mt-0.5">Demoler</span>
             </button>
 
             <div class="w-8 h-px bg-slate-800 my-1 self-center"></div>
 
-            <button id="zoomInBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white transition" title="Zoom In">
-                <i data-lucide="zoom-in" class="w-4 h-4"></i>
-            </button>
-            <button id="zoomOutBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white transition" title="Zoom Out">
-                <i data-lucide="zoom-out" class="w-4 h-4"></i>
-            </button>
-            <button id="centerCamBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white transition" title="Centrar Cámara">
-                <i data-lucide="crosshair" class="w-4 h-4"></i>
-            </button>
+            <button id="zoomInBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white" title="Zoom In"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+            <button id="zoomOutBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white" title="Zoom Out"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+            <button id="centerCamBtn" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white" title="Centrar"><i data-lucide="crosshair" class="w-4 h-4"></i></button>
         </aside>
 
-        <!-- CANVAS DEL JUEGO -->
         <main class="w-full h-full relative overflow-hidden bg-slate-950">
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
             <div id="floatingTextContainer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
         </main>
 
-        <!-- MENÚ DE CONSTRUCCIÓN DESPLEGABLE -->
-        <div id="buildMenuDrawer" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-20 glass-panel-gold rounded-2xl p-4 w-[92%] max-w-3xl shadow-2xl transition-all">
+        <!-- MENÚ CONSTRUCCIÓN -->
+        <div id="buildMenuDrawer" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-20 glass-panel-gold rounded-2xl p-4 w-[92%] max-w-3xl shadow-2xl">
             <div class="flex items-center justify-between mb-3 border-b border-amber-500/20 pb-2">
                 <div class="flex items-center gap-2">
                     <i data-lucide="boxes" class="w-5 h-5 text-amber-400"></i>
-                    <h3 class="font-extrabold text-sm text-slate-100 uppercase tracking-wide">Catálogo de Edificios</h3>
+                    <h3 class="font-extrabold text-sm text-slate-100 uppercase">Catálogo de Edificios</h3>
                 </div>
-                <button id="closeBuildMenu" class="text-slate-400 hover:text-slate-200 p-1">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <button id="closeBuildMenu" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-
-            <!-- Lista de Edificios -->
-            <div id="buildingCardsList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-h-60 overflow-y-auto p-1">
-                <!-- Se llena dinámicamente -->
-            </div>
+            <div id="buildingCardsList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-h-60 overflow-y-auto p-1"></div>
         </div>
 
-        <!-- PANEL INSPECTOR LATERAL -->
-        <aside id="inspectorDrawer" class="hidden absolute right-4 top-4 bottom-6 w-80 glass-panel rounded-2xl p-4 z-20 flex-col shadow-2xl border border-slate-800 transition-all">
+        <!-- INSPECTOR -->
+        <aside id="inspectorDrawer" class="hidden absolute right-4 top-4 bottom-6 w-80 glass-panel rounded-2xl p-4 z-20 flex-col shadow-2xl border border-slate-800">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
                 <div class="flex items-center gap-2.5">
-                    <div id="inspectorIcon" class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold">
-                        <i data-lucide="castle" class="w-5 h-5"></i>
-                    </div>
+                    <div id="inspectorIcon" class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold"><i data-lucide="castle" class="w-5 h-5"></i></div>
                     <div>
                         <h3 id="inspectorTitle" class="font-extrabold text-sm text-slate-100 leading-none">Ayuntamiento</h3>
-                        <span id="inspectorCategory" class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Edificio Principal</span>
+                        <span id="inspectorCategory" class="text-[10px] text-amber-400 font-bold uppercase">Principal</span>
                     </div>
                 </div>
-                <button id="closeInspector" class="text-slate-400 hover:text-white p-1">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <button id="closeInspector" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-
-            <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+            <div class="flex-1 space-y-4">
                 <div class="grid grid-cols-2 gap-2">
                     <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
                         <span class="text-[10px] text-slate-400 uppercase font-bold block">Nivel</span>
                         <span id="inspectorLevel" class="text-sm font-extrabold text-amber-400">Nivel 1</span>
                     </div>
                     <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Espacio Grilla</span>
-                        <span id="inspectorSize" class="text-sm font-extrabold text-blue-400">4 x 4 Tiles</span>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
-                    <span class="text-[11px] text-slate-300 font-bold uppercase block tracking-wider">Estadísticas</span>
-                    <div class="flex justify-between text-xs">
-                        <span class="text-slate-400">Puntos de Vida (HP):</span>
-                        <span id="inspectorHP" class="font-bold text-emerald-400">2,000 / 2,000</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Tamaño</span>
+                        <span id="inspectorSize" class="text-sm font-extrabold text-blue-400">4 x 4</span>
                     </div>
                 </div>
             </div>
-
-            <div class="pt-3 border-t border-slate-800 grid grid-cols-1 gap-2 mt-auto">
-                <button id="inspectDemolishBtn" class="py-2.5 px-3 rounded-xl bg-red-950/60 border border-red-700/40 hover:bg-red-900/60 text-xs font-bold text-red-300 flex items-center justify-center gap-1.5 transition">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    <span>Demoler Edificio</span>
+            <div class="pt-3 border-t border-slate-800 mt-auto">
+                <button id="inspectDemolishBtn" class="w-full py-2.5 px-3 rounded-xl bg-red-950/60 border border-red-700/40 hover:bg-red-900/60 text-xs font-bold text-red-300 flex items-center justify-center gap-1.5">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i><span>Demoler Edificio</span>
                 </button>
             </div>
         </aside>
     </div>
 
     <script>
-        /* ==========================================================================
-           CONFIGURACIÓN SUPABASE & CONexIÓN REAL
-           ========================================================================== */
         const SUPABASE_URL = 'https://dmzneqpvcxvvsbiuvsuv.supabase.co/rest/v1/';
         const SUPABASE_KEY = 'sb_publishable_KPDyDLQ-UNHrqYEgnpZUjw_1VcvWFfk';
-
-        const supabaseClient = supabase.createClient(
-            'https://dmzneqpvcxvvsbiuvsuv.supabase.co', 
-            SUPABASE_KEY
-        );
+        const supabaseClient = supabase.createClient('https://dmzneqpvcxvvsbiuvsuv.supabase.co', SUPABASE_KEY);
 
         let playerData = { gold: 1000, wood: 1000, food: 1000, gems: 1000 };
 
-        async function syncWithSupabase() {
-            try {
-                let { data, error } = await supabaseClient
-                    .from('players')
-                    .select('*')
-                    .eq('username', 'Seoki')
-                    .single();
-
-                if (error || !data) {
-                    // Si no existe, lo creamos
-                    const { data: newData } = await supabaseClient
-                        .from('players')
-                        .insert([{ username: 'Seoki', gold: 1000, wood: 1000, food: 1000, gems: 1000 }])
-                        .select();
-                    if (newData && newData[0]) playerData = newData[0];
-                } else {
-                    playerData = data;
-                }
-                updateHUD();
-            } catch (err) {
-                console.log("Modo local de respaldo activo");
-            }
-        }
-
-        function updateHUD() {
-            document.getElementById('goldCount').innerText = Number(playerData.gold || 1000).toLocaleString();
-            document.getElementById('woodCount').innerText = Number(playerData.wood || 1000).toLocaleString();
-            document.getElementById('foodCount').innerText = Number(playerData.food || 1000).toLocaleString();
-            document.getElementById('gemCount').innerText = Number(playerData.gems || 1000).toLocaleString();
-        }
-
-        /* ==========================================================================
-           MOTOR ISOMÉTRICO
-           ========================================================================== */
         const GRID_SIZE = 30;
         const TILE_WIDTH = 64;
         const TILE_HEIGHT = 32;
@@ -298,8 +217,8 @@
             { id: 'townhall', name: 'Ayuntamiento', category: 'town', width: 4, height: 4, color: '#d97706', roofColor: '#b45309', hp: 2000, cost: 0, icon: 'castle' },
             { id: 'goldmine', name: 'Mina de Oro', category: 'resource', width: 3, height: 3, color: '#eab308', roofColor: '#ca8a04', hp: 800, cost: 300, icon: 'coins' },
             { id: 'lumberjack', name: 'Aserradero', category: 'resource', width: 3, height: 3, color: '#b45309', roofColor: '#78350f', hp: 750, cost: 300, icon: 'trees' },
-            { id: 'cannon', name: 'Cañón Defensivo', category: 'defense', width: 2, height: 2, color: '#475569', roofColor: '#334155', hp: 600, cost: 250, icon: 'crosshair' },
-            { id: 'wall', name: 'Muro de Piedra', category: 'wall', width: 1, height: 1, color: '#64748b', roofColor: '#475569', hp: 1500, cost: 50, icon: 'square' }
+            { id: 'cannon', name: 'Cañón', category: 'defense', width: 2, height: 2, color: '#475569', roofColor: '#334155', hp: 600, cost: 250, icon: 'crosshair' },
+            { id: 'wall', name: 'Muro', category: 'wall', width: 1, height: 1, color: '#64748b', roofColor: '#475569', hp: 1500, cost: 50, icon: 'square' }
         ];
 
         const TERRAIN = { GRASS: 0, WATER: 1, FOREST: 2, ROCK: 3, BORDER: 4 };
@@ -322,22 +241,16 @@
 
         function initTerrainMap() {
             state.map = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(TERRAIN.GRASS));
-            
             for(let r = 0; r < GRID_SIZE; r++) {
                 for(let c = 0; c < GRID_SIZE; c++) {
-                    if(r < 2 || r >= GRID_SIZE - 2 || c < 2 || c >= GRID_SIZE - 2) {
-                        state.map[r][c] = TERRAIN.BORDER;
-                    }
+                    if(r < 2 || r >= GRID_SIZE - 2 || c < 2 || c >= GRID_SIZE - 2) state.map[r][c] = TERRAIN.BORDER;
                 }
             }
-
             for(let i = 0; i < 9; i++) {
                 state.map[6 + i][2 + i] = TERRAIN.WATER;
                 state.map[6 + i][3 + i] = TERRAIN.WATER;
             }
-
             state.map[4][22] = TERRAIN.FOREST;
-            state.map[5][22] = TERRAIN.FOREST;
             state.map[22][5] = TERRAIN.ROCK;
 
             const center = Math.floor(GRID_SIZE / 2) - 2;
@@ -350,25 +263,13 @@
         function placeBuilding(buildingTypeId, r, c) {
             const bDef = BUILDING_CATALOG.find(b => b.id === buildingTypeId);
             if(!bDef) return null;
-
-            const instance = {
-                id: 'b_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                buildingId: buildingTypeId,
-                r: r,
-                c: c,
-                w: bDef.width,
-                h: bDef.height,
-                level: 1
-            };
+            const instance = { id: 'b_' + Date.now(), buildingId: buildingTypeId, r, c, w: bDef.width, h: bDef.height, level: 1 };
             state.buildings.push(instance);
             return instance;
         }
 
         function gridToIso(r, c) {
-            return {
-                x: (c - r) * (TILE_WIDTH / 2),
-                y: (c + r) * (TILE_HEIGHT / 2)
-            };
+            return { x: (c - r) * (TILE_WIDTH / 2), y: (c + r) * (TILE_HEIGHT / 2) };
         }
 
         function isoToGrid(x, y) {
@@ -391,8 +292,7 @@
         }
 
         function render() {
-            if (!state.map || state.map.length === 0) return;
-
+            if (!state.map.length) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
             ctx.translate(state.camera.x, state.camera.y);
@@ -402,31 +302,25 @@
                 for (let c = 0; c < GRID_SIZE; c++) {
                     const { x, y } = gridToIso(r, c);
                     const tileType = state.map[r][c];
-
                     drawIsometricTile(x, y, getTileColor(tileType, r, c));
-
                     if (state.showGrid) {
                         ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
                         ctx.lineWidth = 1;
                         ctx.stroke();
                     }
-
                     if (tileType === TERRAIN.FOREST) drawTree(x, y);
                     if (tileType === TERRAIN.ROCK) drawRock(x, y);
                 }
             }
 
             const sortedBuildings = [...state.buildings].sort((a, b) => (a.r + a.c) - (b.r + b.c));
-            for (const b of sortedBuildings) {
-                drawDetailedBuilding(b);
-            }
+            for (const b of sortedBuildings) drawDetailedBuilding(b);
 
             if (state.activeTool === 'build' && state.selectedBuildingType && state.hoveredTile.r >= 0) {
                 drawPlacementPreview();
             } else if (state.selectedBuildingInstance && state.activeTool === 'select') {
                 drawSelectionHighlight(state.selectedBuildingInstance);
             }
-
             ctx.restore();
         }
 
@@ -453,18 +347,9 @@
         }
 
         function drawTree(x, y) {
-            ctx.fillStyle = '#022c22';
-            ctx.beginPath();
-            ctx.ellipse(x, y + 10, 8, 4, 0, 0, Math.PI * 2);
-            ctx.fill();
-
             ctx.fillStyle = '#15803d';
             ctx.beginPath();
             ctx.arc(x, y - 6, 9, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#22c55e';
-            ctx.beginPath();
-            ctx.arc(x - 2, y - 9, 6, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -473,31 +358,16 @@
             ctx.beginPath();
             ctx.ellipse(x, y + 4, 9, 5, 0, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#94a3b8';
-            ctx.beginPath();
-            ctx.ellipse(x - 2, y + 2, 5, 3, 0, 0, Math.PI * 2);
-            ctx.fill();
         }
 
         function drawDetailedBuilding(b) {
             const bDef = BUILDING_CATALOG.find(cat => cat.id === b.buildingId);
             if (!bDef) return;
-
             const isoTop = gridToIso(b.r, b.c);
             const isoRight = gridToIso(b.r, b.c + b.w);
             const isoBottom = gridToIso(b.r + b.h, b.c + b.w);
             const isoLeft = gridToIso(b.r + b.h, b.c);
-
             const height3D = b.w * 16 + 12;
-
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            ctx.beginPath();
-            ctx.moveTo(isoTop.x + 10, isoTop.y + 10);
-            ctx.lineTo(isoRight.x + 14, isoRight.y + 10);
-            ctx.lineTo(isoBottom.x + 14, isoBottom.y + 10);
-            ctx.lineTo(isoLeft.x + 10, isoLeft.y + 10);
-            ctx.closePath();
-            ctx.fill();
 
             ctx.fillStyle = adjustColor(bDef.color, -50);
             ctx.beginPath();
@@ -525,14 +395,11 @@
             ctx.lineTo(isoLeft.x, isoLeft.y - height3D);
             ctx.closePath();
             ctx.fill();
-
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-            ctx.lineWidth = 1.5;
             ctx.stroke();
 
             const centerX = (isoTop.x + isoBottom.x) / 2;
             const centerY = (isoTop.y + isoBottom.y) / 2 - height3D;
-
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 10px Plus Jakarta Sans';
             ctx.textAlign = 'center';
@@ -544,7 +411,6 @@
             const isoRight = gridToIso(b.r, b.c + b.w);
             const isoBottom = gridToIso(b.r + b.h, b.c + b.w);
             const isoLeft = gridToIso(b.r + b.h, b.c);
-
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -559,20 +425,14 @@
         function drawPlacementPreview() {
             const bDef = BUILDING_CATALOG.find(cat => cat.id === state.selectedBuildingType);
             if (!bDef) return;
-
-            const r = state.hoveredTile.r;
-            const c = state.hoveredTile.c;
+            const r = state.hoveredTile.r, c = state.hoveredTile.c;
             const isValid = canPlaceBuilding(r, c, bDef.width, bDef.height);
-
             const isoTop = gridToIso(r, c);
             const isoRight = gridToIso(r, c + bDef.width);
             const isoBottom = gridToIso(r + bDef.height, c + bDef.width);
             const isoLeft = gridToIso(r + bDef.height, c);
 
             ctx.fillStyle = isValid ? 'rgba(34, 197, 94, 0.45)' : 'rgba(239, 68, 68, 0.45)';
-            ctx.strokeStyle = isValid ? '#22c55e' : '#ef4444';
-            ctx.lineWidth = 2;
-
             ctx.beginPath();
             ctx.moveTo(isoTop.x, isoTop.y);
             ctx.lineTo(isoRight.x, isoRight.y);
@@ -580,12 +440,10 @@
             ctx.lineTo(isoLeft.x, isoLeft.y);
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
         }
 
         function canPlaceBuilding(r, c, w, h) {
             if (r < 2 || c < 2 || r + h > GRID_SIZE - 2 || c + w > GRID_SIZE - 2) return false;
-
             for (let i = r; i < r + h; i++) {
                 for (let j = c; j < c + w; j++) {
                     if (state.map[i][j] !== TERRAIN.GRASS) return false;
@@ -599,31 +457,13 @@
 
         function adjustColor(col, amt) {
             let num = parseInt(col.replace('#', ''), 16);
-            let r = (num >> 16) + amt;
-            let g = ((num >> 8) & 0x00FF) + amt;
-            let b = (num & 0x0000FF) + amt;
+            let r = (num >> 16) + amt, g = ((num >> 8) & 0x00FF) + amt, b = (num & 0x0000FF) + amt;
             return '#' + (0x1000000 + (r<255?r<0?0:r:255)*0x10000 + (g<255?g<0?0:g:255)*0x100 + (b<255?b<0?0:b:255)).toString(16).slice(1);
         }
 
-        function showFloatText(text, x, y, color) {
-            const el = document.createElement('div');
-            el.className = 'float-text text-sm';
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
-            el.style.color = color;
-            el.innerText = text;
-            document.getElementById('floatingTextContainer').appendChild(el);
-            setTimeout(() => el.remove(), 1200);
-        }
-
         canvas.addEventListener('mousedown', (e) => {
-            if (e.button === 0) {
-                state.isPanning = true;
-                state.panStart.x = e.clientX - state.camera.x;
-                state.panStart.y = e.clientY - state.camera.y;
-            }
+            if (e.button === 0) { state.isPanning = true; state.panStart.x = e.clientX - state.camera.x; state.panStart.y = e.clientY - state.camera.y; }
         });
-
         window.addEventListener('mousemove', (e) => {
             if (state.isPanning) {
                 state.camera.x = e.clientX - state.panStart.x;
@@ -636,9 +476,7 @@
                 render();
             }
         });
-
         window.addEventListener('mouseup', () => { state.isPanning = false; });
-
         canvas.addEventListener('wheel', (e) => {
             e.preventDefault();
             const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
@@ -650,14 +488,12 @@
             const mouseX = (e.clientX - state.camera.x) / state.camera.zoom;
             const mouseY = (e.clientY - state.camera.y) / state.camera.zoom;
             const { r, c } = isoToGrid(mouseX, mouseY);
-
             if (r < 0 || c < 0 || r >= GRID_SIZE || c >= GRID_SIZE) return;
 
             if (state.activeTool === 'build' && state.selectedBuildingType) {
                 const bDef = BUILDING_CATALOG.find(cat => cat.id === state.selectedBuildingType);
                 if (bDef && canPlaceBuilding(r, c, bDef.width, bDef.height)) {
                     placeBuilding(state.selectedBuildingType, r, c);
-                    showFloatText(`+1 ${bDef.name}`, e.clientX, e.clientY, '#f59e0b');
                     render();
                 }
             } else if (state.activeTool === 'select') {
@@ -672,28 +508,17 @@
                 render();
             } else if (state.activeTool === 'demolish') {
                 const bIndex = state.buildings.findIndex(b => r >= b.r && r < b.r + b.h && c >= b.c && c < b.c + b.w);
-                if (bIndex !== -1) {
-                    state.buildings.splice(bIndex, 1);
-                    showFloatText('Demolido', e.clientX, e.clientY, '#ef4444');
-                    render();
-                }
+                if (bIndex !== -1) { state.buildings.splice(bIndex, 1); render(); }
             }
         });
 
         const toolBtns = document.querySelectorAll('.tool-btn');
         toolBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                toolBtns.forEach(b => {
-                    b.classList.remove('active', 'border-amber-500', 'border-2', 'text-amber-400');
-                    b.classList.add('border-slate-800', 'text-slate-300');
-                });
+                toolBtns.forEach(b => b.classList.remove('active', 'border-amber-500', 'border-2', 'text-amber-400'));
                 btn.classList.add('active', 'border-amber-500', 'border-2', 'text-amber-400');
-                
                 if(btn.id === 'toolSelect') state.activeTool = 'select';
-                if(btn.id === 'toolBuild') {
-                    state.activeTool = 'build';
-                    openBuildMenu();
-                }
+                if(btn.id === 'toolBuild') { state.activeTool = 'build'; openBuildMenu(); }
                 if(btn.id === 'toolDemolish') state.activeTool = 'demolish';
             });
         });
@@ -703,44 +528,23 @@
             container.innerHTML = '';
             BUILDING_CATALOG.forEach(b => {
                 const card = document.createElement('div');
-                card.className = `p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 cursor-pointer transition flex flex-col justify-between ${state.selectedBuildingType === b.id ? 'ring-2 ring-amber-400' : ''}`;
-                card.onclick = () => {
-                    state.selectedBuildingType = b.id;
-                    state.activeTool = 'build';
-                    populateBuildCatalog();
-                };
-                card.innerHTML = `
-                    <div class="flex items-center gap-2 mb-1">
-                        <i data-lucide="${b.icon}" class="w-4 h-4 text-amber-400"></i>
-                        <span class="font-bold text-xs text-slate-200 truncate">${b.name}</span>
-                    </div>
-                    <div class="text-[10px] text-slate-400 flex justify-between">
-                        <span>${b.width}x${b.height} Tiles</span>
-                        <span class="text-amber-300 font-bold">${b.cost} G</span>
-                    </div>
-                `;
+                card.className = `p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 cursor-pointer transition flex flex-col justify-between`;
+                card.onclick = () => { state.selectedBuildingType = b.id; state.activeTool = 'build'; populateBuildCatalog(); };
+                card.innerHTML = `<div class="flex items-center gap-2 mb-1"><i data-lucide="${b.icon}" class="w-4 h-4 text-amber-400"></i><span class="font-bold text-xs text-slate-200">${b.name}</span></div><div class="text-[10px] text-slate-400 flex justify-between"><span>${b.width}x${b.height}</span><span class="text-amber-300 font-bold">${b.cost} G</span></div>`;
                 container.appendChild(card);
             });
             lucide.createIcons();
         }
 
-        function openBuildMenu() {
-            document.getElementById('buildMenuDrawer').classList.remove('hidden');
-            populateBuildCatalog();
-        }
-
+        function openBuildMenu() { document.getElementById('buildMenuDrawer').classList.remove('hidden'); populateBuildCatalog(); }
         document.getElementById('closeBuildMenu').onclick = () => document.getElementById('buildMenuDrawer').classList.add('hidden');
 
         function openInspector(b) {
             const bDef = BUILDING_CATALOG.find(cat => cat.id === b.buildingId);
             if (!bDef) return;
-
             document.getElementById('inspectorTitle').innerText = bDef.name;
-            document.getElementById('inspectorCategory').innerText = bDef.category.toUpperCase();
             document.getElementById('inspectorLevel').innerText = `Nivel ${b.level}`;
-            document.getElementById('inspectorSize').innerText = `${b.w} x ${b.h} Tiles`;
-            document.getElementById('inspectorHP').innerText = `${bDef.hp} / ${bDef.hp}`;
-
+            document.getElementById('inspectorSize').innerText = `${b.w} x ${b.h}`;
             document.getElementById('inspectorDrawer').classList.remove('hidden');
             document.getElementById('inspectorDrawer').classList.add('flex');
         }
@@ -749,7 +553,6 @@
             document.getElementById('inspectorDrawer').classList.add('hidden');
             document.getElementById('inspectorDrawer').classList.remove('flex');
         }
-
         document.getElementById('closeInspector').onclick = closeInspector;
 
         document.getElementById('inspectDemolishBtn').onclick = () => {
@@ -766,16 +569,8 @@
         document.getElementById('zoomOutBtn').onclick = () => { state.camera.zoom = Math.max(state.camera.zoom / 1.2, 0.5); render(); };
         document.getElementById('centerCamBtn').onclick = centerCamera;
 
-        // INICIALIZACIÓN GENERAL
         initTerrainMap();
-        syncWithSupabase();
-
-        window.onload = () => {
-            lucide.createIcons();
-            resizeCanvas();
-            centerCamera();
-        };
-
+        window.onload = () => { lucide.createIcons(); resizeCanvas(); centerCamera(); };
         window.addEventListener('resize', resizeCanvas);
     </script>
 </body>
