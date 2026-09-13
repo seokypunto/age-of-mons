@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Age of Mons</title>
+    <style>
+        body { 
+            background: #111; 
+            color: #fff; 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding-top: 50px; 
+        }
+        .hud { 
+            background: #222; 
+            display: inline-block; 
+            padding: 20px 40px; 
+            border-radius: 8px; 
+            border: 2px solid #444;
+            font-size: 20px;
+        }
+        .resource { margin: 0 10px; font-weight: bold; color: #f39c12; }
+    </style>
+</head>
+<body>
+
+    <h1>Age of Mons - Aldea de Seoki</h1>
+    <p>Construye, gestiona y haz crecer tu imperio.</p>
+
+    <div class="hud" id="game-hud">
+        Cargando aldea...
+    </div>
+
+    <!-- Librería de Supabase para la web -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Configuración de conexión a Supabase
+        const SUPABASE_URL = 'https://tu-proyecto.supabase.co'; // (Aquí pondremos tus credenciales reales)
+        const SUPABASE_KEY = 'tu-clave-anon';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function initGame() {
+            document.getElementById('game-hud').innerHTML = `
+                <span class="resource">🪙 Oro: 1000</span> 
+                <span class="resource">🪵 Madera: 1000</span> 
+                <span class="resource">🍖 Comida: 1000</span>
+            `;
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
