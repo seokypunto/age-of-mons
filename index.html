@@ -36,7 +36,6 @@
         canvas:active {
             cursor: grabbing;
         }
-        /* Overlays & UI */
         .ui-top-bar {
             position: absolute;
             top: 20px;
@@ -94,8 +93,6 @@
             background: #059669;
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
-
-        /* Build Menu Bottom Drawer */
         .ui-build-menu {
             position: absolute;
             bottom: 25px;
@@ -137,8 +134,6 @@
             border-color: #38bdf8;
             color: #ffffff;
         }
-
-        /* Controls Panel (Zoom / Tools) */
         .ui-controls {
             position: absolute;
             right: 25px;
@@ -169,8 +164,6 @@
             background: #38bdf8;
             color: #0f172a;
         }
-
-        /* Mode Indicator */
         #mode-banner {
             position: absolute;
             top: 80px;
@@ -192,7 +185,6 @@
 <body>
 
     <div id="game-container">
-        <!-- Barra Superior de Recursos y Web3 -->
         <div class="ui-top-bar">
             <div class="stats-group">
                 <div class="badge">💎 CRIPTO: <span id="crypto-count">120</span></div>
@@ -204,10 +196,8 @@
             </button>
         </div>
 
-        <!-- Banner de estado del modo actual -->
         <div id="mode-banner">Modo Construcción Activo: Haz clic en una casilla limpia para construir</div>
 
-        <!-- Menú Inferior de Construcción -->
         <div class="ui-build-menu">
             <button class="build-btn" onclick="selectBuildOption(null)">
                 <span>🔍</span> Navegar
@@ -230,7 +220,6 @@
             </button>
         </div>
 
-        <!-- Controles Lateral (Zoom y Guardado) -->
         <div class="ui-controls">
             <button class="icon-btn" onclick="adjustZoom(0.15)" title="Acercar">+</button>
             <button class="icon-btn" onclick="adjustZoom(-0.15)" title="Alejar">-</button>
@@ -245,7 +234,34 @@
         const canvas = document.getElementById('isometricCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Estado del Juego y Economía
+        // ==========================================
+        // SISTEMA DE CARGA DE ASSETS / IMÁGENES
+        // ==========================================
+        // Puedes poner rutas a imágenes locales ("assets/tree.png") o URLs de internet.
+        // Si la ruta está vacía o falla, el juego dibuja la figura vectorial por defecto.
+        const ASSETS_CONFIG = {
+            tree: "",         // Ejemplo: "assets/tree.png"
+            townhall: "",     // Ejemplo: "assets/townhall.png"
+            hut: "",          // Ejemplo: "assets/hut.png"
+            collector: "",    // Ejemplo: "assets/collector.png"
+            wall: ""          // Ejemplo: "assets/wall.png"
+        };
+
+        const loadedAssets = {};
+
+        function initAssets() {
+            Object.keys(ASSETS_CONFIG).forEach(key => {
+                const src = ASSETS_CONFIG[key];
+                if (src) {
+                    const img = new Image();
+                    img.src = src;
+                    img.onload = () => { loadedAssets[key] = img; };
+                }
+            });
+        }
+        initAssets();
+
+        // Estado del Juego
         let cryptoTokens = 120;
         let elixirTokens = 45;
         let walletConnected = false;
@@ -255,32 +271,18 @@
         const walletBtn = document.getElementById('wallet-btn');
         const modeBanner = document.getElementById('mode-banner');
 
-        // Dimensiones Isométricas y Tamaño del Mapa Ampliado (16x16)
         const MAP_SIZE = 16;
         const TILE_WIDTH = 64;
         const TILE_HEIGHT = 32;
 
-        // Cámara Pan & Zoom
         let zoom = 1.0;
         let cameraOffset = { x: 0, y: 0 };
         let isDragging = false;
         let dragStart = { x: 0, y: 0 };
         let mousePos = { x: -1, y: -1 };
         let hoveredTile = { x: -1, y: -1 };
-
-        // Edificio seleccionado para construir (null = modo navegación/interacción)
         let selectedBuildType = null;
 
-        /*
-           Codificación del Mapa:
-           0: Pasto libre
-           1: Agua
-           2: Ayuntamiento / Edificio Central
-           3: Choza Cripto
-           4: Árbol (Obstáculo)
-           5: Recolector de Elixir
-           6: Muralla Defensiva
-        */
         let mapGrid = [
             [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
             [1, 1, 1, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0],
@@ -300,7 +302,6 @@
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ];
 
-        // Entidades dinámicas
         let villagers = [
             { x: 3, y: 4, targetX: 7, targetY: 4, progress: 0, speed: 0.006 },
             { x: 8, y: 2, targetX: 8, targetY: 9, progress: 0, speed: 0.005 },
@@ -314,7 +315,6 @@
 
         let animationFrame = 0;
 
-        // Redimensionado dinámico del Canvas
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -330,7 +330,6 @@
             zoom = 1.0;
         }
 
-        // Proyección Isométrica <-> Pantalla
         function isoToScreen(isoX, isoY) {
             const screenX = cameraOffset.x + (isoX - isoY) * (TILE_WIDTH / 2) * zoom;
             const screenY = cameraOffset.y + (isoX + isoY) * (TILE_HEIGHT / 2) * zoom;
@@ -347,7 +346,6 @@
             return { x: Math.floor(isoX), y: Math.floor(isoY) };
         }
 
-        // Renderizado del terreno
         function drawTile(isoX, isoY, type) {
             const screen = isoToScreen(isoX, isoY);
             const w = TILE_WIDTH * zoom;
@@ -361,21 +359,17 @@
             ctx.closePath();
 
             if (type === 1) {
-                // Agua animada
                 let wave = Math.sin(animationFrame * 0.05 + isoX + isoY) * 15;
                 ctx.fillStyle = `rgb(14, 116, ${144 + Math.floor(wave)})`;
             } else {
-                // Pasto estilizado con patrón ajedrezado sutil
                 ctx.fillStyle = (isoX + isoY) % 2 === 0 ? '#10b981' : '#059669';
             }
             ctx.fill();
 
-            // Bordes suaves
             ctx.strokeStyle = '#047857';
             ctx.lineWidth = 1 * zoom;
             ctx.stroke();
 
-            // Resaltado de casilla bajo el cursor
             if (isoX === hoveredTile.x && isoY === hoveredTile.y) {
                 ctx.fillStyle = selectedBuildType !== null ? 
                     (type === 0 ? 'rgba(56, 189, 248, 0.4)' : 'rgba(239, 68, 68, 0.5)') : 
@@ -387,31 +381,46 @@
             }
         }
 
-        // Renderizado de estructuras y objetos
         function drawBuilding(isoX, isoY, type) {
             const screen = isoToScreen(isoX, isoY);
             const w = TILE_WIDTH * zoom;
             const h = TILE_HEIGHT * zoom;
 
+            // Determinar la clave de asset
+            let assetKey = "";
+            if (type === 2) assetKey = "townhall";
+            else if (type === 3) assetKey = "hut";
+            else if (type === 5) assetKey = "collector";
+            else if (type === 6) assetKey = "wall";
+
+            // Si hay una imagen cargada para este tipo, se usa la imagen
+            if (assetKey && loadedAssets[assetKey]) {
+                const img = loadedAssets[assetKey];
+                const imgW = w * 1.2;
+                const imgH = (w * 1.2) * (img.height / img.width);
+                ctx.drawImage(img, screen.x - imgW / 2, screen.y + h - imgH, imgW, imgH);
+                return;
+            }
+
+            // Renderizado vectorial 3D (Fallback en código)
             let height = 35 * zoom;
             let baseColor = '#8b5cf6';
             let roofColor = '#6d28d9';
 
-            if (type === 2) { // Ayuntamiento
+            if (type === 2) {
                 height = 55 * zoom;
                 baseColor = '#3b82f6';
                 roofColor = '#1d4ed8';
-            } else if (type === 5) { // Recolector
+            } else if (type === 5) {
                 height = 30 * zoom;
                 baseColor = '#ec4899';
                 roofColor = '#be185d';
-            } else if (type === 6) { // Muralla
+            } else if (type === 6) {
                 height = 18 * zoom;
                 baseColor = '#64748b';
                 roofColor = '#475569';
             }
 
-            // Pared izquierda
             ctx.fillStyle = baseColor;
             ctx.beginPath();
             ctx.moveTo(screen.x - w / 2, screen.y + h / 2);
@@ -421,7 +430,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Pared derecha
             ctx.fillStyle = shadeColor(baseColor, -20);
             ctx.beginPath();
             ctx.moveTo(screen.x, screen.y + h);
@@ -431,7 +439,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Techo isométrico
             ctx.fillStyle = roofColor;
             ctx.beginPath();
             ctx.moveTo(screen.x, screen.y - height);
@@ -444,10 +451,20 @@
 
         function drawTree(isoX, isoY) {
             const screen = isoToScreen(isoX, isoY);
-            // Tronco
+            const w = TILE_WIDTH * zoom;
+            const h = TILE_HEIGHT * zoom;
+
+            if (loadedAssets["tree"]) {
+                const img = loadedAssets["tree"];
+                const imgW = w * 0.9;
+                const imgH = imgW * (img.height / img.width);
+                ctx.drawImage(img, screen.x - imgW / 2, screen.y + h - imgH, imgW, imgH);
+                return;
+            }
+
+            // Tronco y Follaje (Fallback)
             ctx.fillStyle = '#78350f';
             ctx.fillRect(screen.x - 3 * zoom, screen.y + 5 * zoom, 6 * zoom, 16 * zoom);
-            // Follaje
             ctx.fillStyle = '#047857';
             ctx.beginPath();
             ctx.arc(screen.x, screen.y - 8 * zoom, 14 * zoom, 0, Math.PI * 2);
@@ -459,13 +476,11 @@
             let currentY = v.y + (v.targetY - v.y) * v.progress;
             const screen = isoToScreen(currentX, currentY);
 
-            // Sombra
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.beginPath();
             ctx.ellipse(screen.x, screen.y + (TILE_HEIGHT / 2) * zoom, 8 * zoom, 4 * zoom, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Personaje
             ctx.fillStyle = '#f59e0b';
             ctx.beginPath();
             ctx.arc(screen.x, screen.y + 4 * zoom, 6 * zoom, 0, Math.PI * 2);
@@ -510,7 +525,6 @@
             return "#"+RR+GG+BB;
         }
 
-        // --- Eventos de Interacción (Cámara y Selección) ---
         canvas.addEventListener('mousedown', (e) => {
             isDragging = true;
             dragStart.x = e.clientX - cameraOffset.x;
@@ -530,20 +544,16 @@
             }
         });
 
-        canvas.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
 
         canvas.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const delta = e.deltaY < 0 ? 0.1 : -0.1;
-            adjustZoom(delta);
+            adjustZoom(e.deltaY < 0 ? 0.1 : -0.1);
         });
 
         canvas.addEventListener('click', (e) => {
             const clickedIso = screenToIso(mousePos.x, mousePos.y);
 
-            // 1. Recolección de recursos flotantes
             floatingTokens.forEach(token => {
                 if (!token.collected) {
                     const screen = isoToScreen(token.x, token.y);
@@ -566,10 +576,9 @@
                 }
             });
 
-            // 2. Construcción en casillas válidas
             if (selectedBuildType !== null) {
                 if (clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
-                    if (mapGrid[clickedIso.y][clickedIso.x] === 0) { // Si es pasto libre
+                    if (mapGrid[clickedIso.y][clickedIso.x] === 0) {
                         const costs = { 2: 50, 3: 20, 5: 30, 6: 5 };
                         const cost = costs[selectedBuildType] || 10;
 
@@ -585,7 +594,6 @@
             }
         });
 
-        // Selección de opciones del menú
         function selectBuildOption(type) {
             selectedBuildType = type;
             document.querySelectorAll('.build-btn').forEach(btn => btn.classList.remove('active'));
@@ -602,7 +610,6 @@
             zoom = Math.min(Math.max(0.5, zoom + delta), 2.2);
         }
 
-        // Simulación Web3
         function toggleWallet() {
             walletConnected = !walletConnected;
             if (walletConnected) {
@@ -614,7 +621,6 @@
             }
         }
 
-        // Guardar Aldea en LocalStorage
         function saveGame() {
             localStorage.setItem('web3_isometric_village', JSON.stringify({
                 map: mapGrid,
@@ -634,18 +640,14 @@
                     elixirTokens = data.elixir;
                     cryptoDisplay.innerText = cryptoTokens;
                     elixirDisplay.innerText = elixirTokens;
-                } catch(e) {
-                    console.log("No se pudo cargar el guardado previo.");
-                }
+                } catch(e) {}
             }
         }
 
-        // Bucle Principal del Juego
         function gameLoop() {
             animationFrame++;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar el mapa ordenado de atrás hacia adelante
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
                     const tileType = mapGrid[y][x];
@@ -659,14 +661,12 @@
                 }
             }
 
-            // Entidades dinámicas
             villagers.forEach(drawVillager);
             floatingTokens.forEach(drawFloatingToken);
 
             requestAnimationFrame(gameLoop);
         }
 
-        // Inicializar
         resizeCanvas();
         loadGame();
         gameLoop();
