@@ -234,18 +234,17 @@
         const canvas = document.getElementById('isometricCanvas');
         const ctx = canvas.getContext('2d');
 
-        // ==========================================
-        // SISTEMA DE CARGA DE ASSETS / IMÁGENES
-        // ==========================================
-        // Puedes poner rutas a imágenes locales ("assets/tree.png") o URLs de internet.
-        // Si la ruta está vacía o falla, el juego dibuja la figura vectorial por defecto.
-      const ASSETS_CONFIG = {
-    tree: "assets/arbol.png",
-    townhall: "assets/ayuntamiento.png",
-    hut: "assets/choza.png",
-    collector: "assets/recolector.png",
-    wall: "assets/muralla.png"
-};
+        // =========================================================================
+        // CONFIGURACIÓN DE ASSETS / GRÁFICOS (SVG INCRUSTADOS DIRECTAMENTE EN CÓDIGO)
+        // Puedes cambiar estas URLs por tus propios archivos locales (ej. "assets/tree.png")
+        // =========================================================================
+        const ASSETS_CONFIG = {
+            tree: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><ellipse cx="50" cy="110" rx="30" ry="10" fill="rgba(0,0,0,0.2)"/><rect x="44" y="70" width="12" height="35" rx="3" fill="%2378350f"/><polygon points="50,10 10,70 90,70" fill="%23047857"/><polygon points="50,25 20,75 80,75" fill="%2310b981"/><polygon points="50,40 30,85 70,85" fill="%2334d399"/></svg>',
+            townhall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><ellipse cx="60" cy="125" rx="55" ry="15" fill="rgba(0,0,0,0.3)"/><path d="M60 20 L110 45 L60 70 L10 45 Z" fill="%232563eb"/><path d="M10 45 L60 70 L60 120 L10 95 Z" fill="%231d4ed8"/><path d="M60 70 L110 45 L110 95 L60 120 Z" fill="%231e40af"/><polygon points="60,5 60,25 90,35 60,20" fill="%233b82f6"/><path d="M50 90 L70 100 L70 120 L50 110 Z" fill="%23fbbf24"/></svg>',
+            hut: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="40" ry="12" fill="rgba(0,0,0,0.25)"/><path d="M50 15 L90 35 L50 55 L10 35 Z" fill="%23a855f7"/><path d="M10 35 L50 55 L50 85 L10 65 Z" fill="%237e22ce"/><path d="M50 55 L90 35 L90 65 L50 85 Z" fill="%236b21a8"/><rect x="42" y="60" width="16" height="20" fill="%23fbbf24" rx="2"/></svg>',
+            collector: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="35" ry="10" fill="rgba(0,0,0,0.25)"/><path d="M50 20 L80 35 L50 50 L20 35 Z" fill="%23ec4899"/><path d="M20 35 L50 50 L50 80 L20 65 Z" fill="%23be185d"/><path d="M50 50 L80 35 L80 65 L50 80 Z" fill="%239d174d"/><polygon points="50,5 62,22 50,30 38,22" fill="%23f472b6"/></svg>',
+            wall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60"><path d="M40 10 L70 25 L40 40 L10 25 Z" fill="%2364748b"/><path d="M10 25 L40 40 L40 55 L10 40 Z" fill="%23475569"/><path d="M40 40 L70 25 L70 40 L40 55 Z" fill="%23334155"/></svg>'
+        };
 
         const loadedAssets = {};
 
@@ -386,14 +385,12 @@
             const w = TILE_WIDTH * zoom;
             const h = TILE_HEIGHT * zoom;
 
-            // Determinar la clave de asset
             let assetKey = "";
             if (type === 2) assetKey = "townhall";
             else if (type === 3) assetKey = "hut";
             else if (type === 5) assetKey = "collector";
             else if (type === 6) assetKey = "wall";
 
-            // Si hay una imagen cargada para este tipo, se usa la imagen
             if (assetKey && loadedAssets[assetKey]) {
                 const img = loadedAssets[assetKey];
                 const imgW = w * 1.2;
@@ -402,7 +399,7 @@
                 return;
             }
 
-            // Renderizado vectorial 3D (Fallback en código)
+            // Renderizado vectorial 3D como respaldo
             let height = 35 * zoom;
             let baseColor = '#8b5cf6';
             let roofColor = '#6d28d9';
@@ -462,7 +459,7 @@
                 return;
             }
 
-            // Tronco y Follaje (Fallback)
+            // Respaldo por código
             ctx.fillStyle = '#78350f';
             ctx.fillRect(screen.x - 3 * zoom, screen.y + 5 * zoom, 6 * zoom, 16 * zoom);
             ctx.fillStyle = '#047857';
