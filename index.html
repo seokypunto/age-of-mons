@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criptomaníacos - Aldea Isométrica Web3</title>
     <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
         body {
             margin: 0;
             padding: 0;
-            background-color: #0b0f19;
+            background-color: #090d16;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -17,277 +21,335 @@
             justify-content: center;
             min-height: 100vh;
             overflow: hidden;
-            user-select: none;
         }
-
         #game-container {
             position: relative;
-            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.2);
-            border: 2px solid #1f293d;
-            border-radius: 12px;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
-            background: #111827;
+            background: radial-gradient(circle at center, #111827 0%, #080c14 100%);
         }
-
         canvas {
             display: block;
-            background: linear-gradient(to bottom, #1e293b, #0f172a);
             cursor: grab;
         }
-
         canvas:active {
             cursor: grabbing;
         }
-
-        .ui-overlay {
+        .ui-top-bar {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
+            top: 20px;
+            left: 20px;
+            right: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             pointer-events: none;
             z-index: 10;
         }
-
         .stats-group {
             display: flex;
             gap: 12px;
+            pointer-events: auto;
         }
-
         .badge {
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid #38bdf8;
-            padding: 8px 14px;
-            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid #00f0ff44;
+            backdrop-filter: blur(8px);
+            padding: 10px 16px;
+            border-radius: 12px;
             font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            font-weight: 700;
+            color: #f8fafc;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             display: flex;
             align-items: center;
-            gap: 6px;
-            backdrop-filter: blur(4px);
+            gap: 8px;
         }
-
-        .btn-wallet {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border: 1px solid #fcd34d;
-            color: #ffffff;
-            padding: 8px 16px;
-            border-radius: 8px;
+        .badge span {
+            color: #38bdf8;
+            font-size: 16px;
+        }
+        .btn-web3 {
+            pointer-events: auto;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
             font-weight: bold;
             cursor: pointer;
-            pointer-events: auto;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
             transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        .btn-wallet:hover {
+        .btn-web3:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
         }
-
-        .build-menu {
+        .btn-web3.connected {
+            background: #059669;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .ui-build-menu {
             position: absolute;
-            bottom: 15px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.92);
             border: 1px solid #334155;
-            padding: 8px;
-            border-radius: 12px;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(12px);
+            padding: 12px 20px;
+            border-radius: 18px;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             z-index: 10;
         }
-
         .build-btn {
             background: #1e293b;
             border: 1px solid #475569;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
+            color: #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 600;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
             transition: all 0.2s;
         }
-
-        .build-btn:hover, .build-btn.active {
-            background: #3b82f6;
-            border-color: #60a5fa;
+        .build-btn:hover {
+            background: #334155;
+            border-color: #38bdf8;
+            color: #38bdf8;
+            transform: translateY(-2px);
         }
-
-        .controls-hint {
+        .build-btn.active {
+            background: #0284c7;
+            border-color: #38bdf8;
+            color: #ffffff;
+        }
+        .ui-controls {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background: rgba(15, 23, 42, 0.7);
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            color: #94a3b8;
-            pointer-events: none;
+            right: 25px;
+            bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+        .icon-btn {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid #334155;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s;
+        }
+        .icon-btn:hover {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+        #mode-banner {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(14, 165, 233, 0.9);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+            z-index: 9;
         }
     </style>
 </head>
 <body>
 
     <div id="game-container">
-        <div class="ui-overlay">
+        <div class="ui-top-bar">
             <div class="stats-group">
                 <div class="badge">💎 CRIPTO: <span id="crypto-count">120</span></div>
+                <div class="badge">🧪 ELIXIR: <span id="elixir-count">45</span></div>
                 <div class="badge">⚡ ENERGÍA: <span id="energy-count">100%</span></div>
             </div>
-            <button class="btn-wallet" id="wallet-btn">🦊 CONECTAR WALLET</button>
+            <button class="btn-web3" id="wallet-btn" onclick="toggleWallet()">
+                🦊 <span id="wallet-label">Conectar Wallet</span>
+            </button>
         </div>
 
-        <div class="build-menu">
-            <button class="build-btn active" data-type="select">🔍 Seleccionar</button>
-            <button class="build-btn" data-type="2">🏛️ Ayunt. (50 💎)</button>
-            <button class="build-btn" data-type="3">🏚️ Choza (20 💎)</button>
-            <button class="build-btn" data-type="5">🔮 Recolector (30 💎)</button>
-            <button class="build-btn" data-type="6">🛡️ Muralla (5 💎)</button>
-            <button class="build-btn" data-type="7">🏹 Torre (40 💎)</button>
-            <button class="build-btn" data-type="8">💣 Cañón (45 💎)</button>
+        <div id="mode-banner">Modo Construcción Activo: Haz clic en una casilla limpia para construir</div>
+
+        <div class="ui-build-menu">
+            <button class="build-btn" onclick="selectBuildOption(null)">
+                <span>🔍</span> Navegar
+            </button>
+            <button class="build-btn" id="btn-build-2" onclick="selectBuildOption(2)">
+                <span>🏛️</span> Ayuntamiento
+                <small style="opacity: 0.7;">(50 Cripto)</small>
+            </button>
+            <button class="build-btn" id="btn-build-3" onclick="selectBuildOption(3)">
+                <span>🛖</span> Choza Cripto
+                <small style="opacity: 0.7;">(20 Cripto)</small>
+            </button>
+            <button class="build-btn" id="btn-build-5" onclick="selectBuildOption(5)">
+                <span>🧪</span> Recolector
+                <small style="opacity: 0.7;">(30 Cripto)</small>
+            </button>
+            <button class="build-btn" id="btn-build-6" onclick="selectBuildOption(6)">
+                <span>🛡️</span> Muralla
+                <small style="opacity: 0.7;">(5 Cripto)</small>
+            </button>
         </div>
 
-        <div class="controls-hint">Arrastra para mover el mapa | Rueda para zoom</div>
+        <div class="ui-controls">
+            <button class="icon-btn" onclick="adjustZoom(0.15)" title="Acercar">+</button>
+            <button class="icon-btn" onclick="adjustZoom(-0.15)" title="Alejar">-</button>
+            <button class="icon-btn" onclick="resetCamera()" title="Centrar Mapa">🎯</button>
+            <button class="icon-btn" onclick="saveGame()" title="Guardar Aldea">💾</button>
+        </div>
 
-        <canvas id="isometricCanvas" width="800" height="600"></canvas>
+        <canvas id="isometricCanvas"></canvas>
     </div>
 
     <script>
         const canvas = document.getElementById('isometricCanvas');
         const ctx = canvas.getContext('2d');
 
+        // =========================================================================
+        // CONFIGURACIÓN DE ASSETS / GRÁFICOS (SVG INCRUSTADOS DIRECTAMENTE EN CÓDIGO)
+        // Puedes cambiar estas URLs por tus propios archivos locales (ej. "assets/tree.png")
+        // =========================================================================
+        const ASSETS_CONFIG = {
+            tree: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><ellipse cx="50" cy="110" rx="30" ry="10" fill="rgba(0,0,0,0.2)"/><rect x="44" y="70" width="12" height="35" rx="3" fill="%2378350f"/><polygon points="50,10 10,70 90,70" fill="%23047857"/><polygon points="50,25 20,75 80,75" fill="%2310b981"/><polygon points="50,40 30,85 70,85" fill="%2334d399"/></svg>',
+            townhall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><ellipse cx="60" cy="125" rx="55" ry="15" fill="rgba(0,0,0,0.3)"/><path d="M60 20 L110 45 L60 70 L10 45 Z" fill="%232563eb"/><path d="M10 45 L60 70 L60 120 L10 95 Z" fill="%231d4ed8"/><path d="M60 70 L110 45 L110 95 L60 120 Z" fill="%231e40af"/><polygon points="60,5 60,25 90,35 60,20" fill="%233b82f6"/><path d="M50 90 L70 100 L70 120 L50 110 Z" fill="%23fbbf24"/></svg>',
+            hut: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="40" ry="12" fill="rgba(0,0,0,0.25)"/><path d="M50 15 L90 35 L50 55 L10 35 Z" fill="%23a855f7"/><path d="M10 35 L50 55 L50 85 L10 65 Z" fill="%237e22ce"/><path d="M50 55 L90 35 L90 65 L50 85 Z" fill="%236b21a8"/><rect x="42" y="60" width="16" height="20" fill="%23fbbf24" rx="2"/></svg>',
+            collector: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="35" ry="10" fill="rgba(0,0,0,0.25)"/><path d="M50 20 L80 35 L50 50 L20 35 Z" fill="%23ec4899"/><path d="M20 35 L50 50 L50 80 L20 65 Z" fill="%23be185d"/><path d="M50 50 L80 35 L80 65 L50 80 Z" fill="%239d174d"/><polygon points="50,5 62,22 50,30 38,22" fill="%23f472b6"/></svg>',
+            wall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60"><path d="M40 10 L70 25 L40 40 L10 25 Z" fill="%2364748b"/><path d="M10 25 L40 40 L40 55 L10 40 Z" fill="%23475569"/><path d="M40 40 L70 25 L70 40 L40 55 Z" fill="%23334155"/></svg>'
+        };
+
+        const loadedAssets = {};
+
+        function initAssets() {
+            Object.keys(ASSETS_CONFIG).forEach(key => {
+                const src = ASSETS_CONFIG[key];
+                if (src) {
+                    const img = new Image();
+                    img.src = src;
+                    img.onload = () => { loadedAssets[key] = img; };
+                }
+            });
+        }
+        initAssets();
+
         // Estado del Juego
         let cryptoTokens = 120;
-        let selectedBuildType = 'select';
+        let elixirTokens = 45;
+        let walletConnected = false;
         const cryptoDisplay = document.getElementById('crypto-count');
+        const elixirDisplay = document.getElementById('elixir-count');
+        const walletLabel = document.getElementById('wallet-label');
+        const walletBtn = document.getElementById('wallet-btn');
+        const modeBanner = document.getElementById('mode-banner');
 
-        // Cargar Spritesheet
-        const spritesheet = new Image();
-        spritesheet.src = 'spritesheet.png'; // Asegúrate de que el archivo se llama exactamente así
-        let spritesLoaded = false;
-
-        spritesheet.onload = () => {
-            spritesLoaded = true;
-        };
-
-        // Coordenadas de corte exactas en píxeles dentro de spritesheet.png
-        // Basadas en una resolución de 1024x576 px
-        const SPRITE_MAP = {
-            grass:        { x: 18,  y: 70,  w: 92,  h: 88,  offsetX: 0,   offsetY: 0 },
-            water:        { x: 324, y: 70,  w: 92,  h: 88,  offsetX: 0,   offsetY: 0 },
-            tree:         { x: 224, y: 252, w: 68,  h: 112, offsetX: 0,   offsetY: -35 },
-            townhall:     { x: 42,  y: 532, w: 118, h: 130, offsetX: 0,   offsetY: -45 },
-            hut:          { x: 212, y: 538, w: 116, h: 124, offsetX: 0,   offsetY: -40 },
-            collector:    { x: 370, y: 542, w: 102, h: 122, offsetX: 0,   offsetY: -40 },
-            wall:         { x: 474, y: 825, w: 88,  h: 100, offsetX: 0,   offsetY: -25 },
-            archer_tower: { x: 348, y: 770, w: 80,  h: 148, offsetX: 0,   offsetY: -55 },
-            cannon:       { x: 212, y: 795, w: 108, h: 105, offsetX: 0,   offsetY: -30 }
-        };
-
-        // Configuración Isométrica y Cámara
-        const MAP_SIZE = 12;
+        const MAP_SIZE = 16;
         const TILE_WIDTH = 64;
         const TILE_HEIGHT = 32;
 
-        let camera = {
-            x: canvas.width / 2,
-            y: 120,
-            zoom: 1.0,
-            isDragging: false,
-            startX: 0,
-            startY: 0
-        };
+        let zoom = 1.0;
+        let cameraOffset = { x: 0, y: 0 };
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let mousePos = { x: -1, y: -1 };
+        let hoveredTile = { x: -1, y: -1 };
+        let selectedBuildType = null;
 
-        let hoverTile = { x: -1, y: -1 };
-
-        // Mapa de la aldea (0: pasto, 1: agua, 2: ayuntamiento, 3: choza, 4: árbol, 5: recolector, 6: muralla, 7: torre, 8: cañón)
-        const mapGrid = [
-            [1, 1, 1, 0, 0, 0, 4, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 2, 0, 0, 0, 4, 0, 0, 0],
-            [1, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0],
-            [0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0],
-            [4, 0, 0, 5, 0, 0, 4, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 6, 7, 6, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 6, 8, 6, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        let mapGrid = [
+            [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 0, 0],
+            [1, 0, 0, 0, 0, 2, 2, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 4, 0, 6, 6, 6, 6, 0, 0, 5, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 6, 3, 0, 6, 0, 0, 0, 0, 0, 0, 4, 0],
+            [0, 0, 0, 0, 6, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 4, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 4, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0],
+            [0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0],
+            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ];
 
-        // Aldeanos
         let villagers = [
-            { x: 2, y: 1, targetX: 4, targetY: 4, progress: 0, speed: 0.008 },
-            { x: 4, y: 3, targetX: 1, targetY: 1, progress: 0, speed: 0.006 }
+            { x: 3, y: 4, targetX: 7, targetY: 4, progress: 0, speed: 0.006 },
+            { x: 8, y: 2, targetX: 8, targetY: 9, progress: 0, speed: 0.005 },
+            { x: 2, y: 10, targetX: 10, targetY: 10, progress: 0, speed: 0.007 }
         ];
 
-        // Tokens flotantes recolectables
         let floatingTokens = [
-            { x: 3, y: 2, floatOffset: 0, collected: false },
-            { x: 5, y: 5, floatOffset: 0, collected: false }
+            { x: 6, y: 6, floatOffset: 0, collected: false, type: 'crypto' },
+            { x: 10, y: 5, floatOffset: 0, collected: false, type: 'elixir' }
         ];
 
         let animationFrame = 0;
 
-        // Conversión de coordenadas Isométricas a Pantalla
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (cameraOffset.x === 0 && cameraOffset.y === 0) {
+                resetCamera();
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function resetCamera() {
+            cameraOffset.x = canvas.width / 2;
+            cameraOffset.y = 100;
+            zoom = 1.0;
+        }
+
         function isoToScreen(isoX, isoY) {
-            const screenX = camera.x + (isoX - isoY) * (TILE_WIDTH / 2) * camera.zoom;
-            const screenY = camera.y + (isoX + isoY) * (TILE_HEIGHT / 2) * camera.zoom;
+            const screenX = cameraOffset.x + (isoX - isoY) * (TILE_WIDTH / 2) * zoom;
+            const screenY = cameraOffset.y + (isoX + isoY) * (TILE_HEIGHT / 2) * zoom;
             return { x: screenX, y: screenY };
         }
 
-        // Conversión de Pantalla a Isométrico
         function screenToIso(screenX, screenY) {
-            const adjX = (screenX - camera.x) / camera.zoom;
-            const adjY = (screenY - camera.y) / camera.zoom;
+            const unscaledX = (screenX - cameraOffset.x) / zoom;
+            const unscaledY = (screenY - cameraOffset.y) / zoom;
 
-            const isoX = Math.floor((adjX / (TILE_WIDTH / 2) + adjY / (TILE_HEIGHT / 2)) / 2);
-            const isoY = Math.floor((adjY / (TILE_HEIGHT / 2) - adjX / (TILE_WIDTH / 2)) / 2);
+            const isoX = (unscaledX / (TILE_WIDTH / 2) + unscaledY / (TILE_HEIGHT / 2)) / 2;
+            const isoY = (unscaledY / (TILE_HEIGHT / 2) - unscaledX / (TILE_WIDTH / 2)) / 2;
 
-            return { x: isoX, y: isoY };
+            return { x: Math.floor(isoX), y: Math.floor(isoY) };
         }
 
-        // Función para recortar y dibujar sprites de la hoja de imágenes
-        function drawSprite(spriteKey, screenX, screenY) {
-            const s = SPRITE_MAP[spriteKey];
-            if (!s || !spritesLoaded) return false;
-
-            const destW = s.w * 0.8 * camera.zoom;
-            const destH = s.h * 0.8 * camera.zoom;
-            const destX = screenX - destW / 2 + (s.offsetX * camera.zoom);
-            const destY = screenY + (s.offsetY * camera.zoom);
-
-            ctx.drawImage(
-                spritesheet,
-                s.x, s.y, s.w, s.h,
-                destX, destY, destW, destH
-            );
-            return true;
-        }
-
-        // Dibujar baldosa del terreno
         function drawTile(isoX, isoY, type) {
             const screen = isoToScreen(isoX, isoY);
-            const w = TILE_WIDTH * camera.zoom;
-            const h = TILE_HEIGHT * camera.zoom;
+            const w = TILE_WIDTH * zoom;
+            const h = TILE_HEIGHT * zoom;
 
-            // Intentar dibujar usando la hoja de sprites
-            if (type === 1 && drawSprite('water', screen.x, screen.y)) return;
-            if (type !== 1 && drawSprite('grass', screen.x, screen.y)) return;
-
-            // Dibujo vectorial de respaldo en caso de que la imagen no cargue
             ctx.beginPath();
             ctx.moveTo(screen.x, screen.y);
             ctx.lineTo(screen.x + w / 2, screen.y + h / 2);
@@ -302,57 +364,59 @@
                 ctx.fillStyle = (isoX + isoY) % 2 === 0 ? '#10b981' : '#059669';
             }
             ctx.fill();
+
             ctx.strokeStyle = '#047857';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1 * zoom;
             ctx.stroke();
+
+            if (isoX === hoveredTile.x && isoY === hoveredTile.y) {
+                ctx.fillStyle = selectedBuildType !== null ? 
+                    (type === 0 ? 'rgba(56, 189, 248, 0.4)' : 'rgba(239, 68, 68, 0.5)') : 
+                    'rgba(255, 255, 255, 0.25)';
+                ctx.fill();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2 * zoom;
+                ctx.stroke();
+            }
         }
 
-        // Dibujar resaltado al pasar el ratón
-        function drawTileHighlight(isoX, isoY) {
-            if (isoX < 0 || isoX >= MAP_SIZE || isoY < 0 || isoY >= MAP_SIZE) return;
-
-            const screen = isoToScreen(isoX, isoY);
-            const w = TILE_WIDTH * camera.zoom;
-            const h = TILE_HEIGHT * camera.zoom;
-
-            ctx.beginPath();
-            ctx.moveTo(screen.x, screen.y);
-            ctx.lineTo(screen.x + w / 2, screen.y + h / 2);
-            ctx.lineTo(screen.x, screen.y + h);
-            ctx.lineTo(screen.x - w / 2, screen.y + h / 2);
-            ctx.closePath();
-
-            ctx.fillStyle = selectedBuildType === 'select' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(74, 222, 128, 0.4)';
-            ctx.fill();
-            ctx.strokeStyle = selectedBuildType === 'select' ? '#38bdf8' : '#4ade80';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        // Dibujar estructuras y edificios
         function drawBuilding(isoX, isoY, type) {
             const screen = isoToScreen(isoX, isoY);
+            const w = TILE_WIDTH * zoom;
+            const h = TILE_HEIGHT * zoom;
 
-            // Mapeo a las claves del SPRITE_MAP
-            const spriteKeys = {
-                2: 'townhall',
-                3: 'hut',
-                4: 'tree',
-                5: 'collector',
-                6: 'wall',
-                7: 'archer_tower',
-                8: 'cannon'
-            };
+            let assetKey = "";
+            if (type === 2) assetKey = "townhall";
+            else if (type === 3) assetKey = "hut";
+            else if (type === 5) assetKey = "collector";
+            else if (type === 6) assetKey = "wall";
 
-            if (spriteKeys[type] && drawSprite(spriteKeys[type], screen.x, screen.y)) {
+            if (assetKey && loadedAssets[assetKey]) {
+                const img = loadedAssets[assetKey];
+                const imgW = w * 1.2;
+                const imgH = (w * 1.2) * (img.height / img.width);
+                ctx.drawImage(img, screen.x - imgW / 2, screen.y + h - imgH, imgW, imgH);
                 return;
             }
 
-            // Dibujo vectorial de respaldo
-            let height = (type === 2 ? 50 : 35) * camera.zoom;
-            let baseColor = type === 2 ? '#3b82f6' : (type === 5 ? '#ec4899' : '#8b5cf6');
-            let w = TILE_WIDTH * camera.zoom;
-            let h = TILE_HEIGHT * camera.zoom;
+            // Renderizado vectorial 3D como respaldo
+            let height = 35 * zoom;
+            let baseColor = '#8b5cf6';
+            let roofColor = '#6d28d9';
+
+            if (type === 2) {
+                height = 55 * zoom;
+                baseColor = '#3b82f6';
+                roofColor = '#1d4ed8';
+            } else if (type === 5) {
+                height = 30 * zoom;
+                baseColor = '#ec4899';
+                roofColor = '#be185d';
+            } else if (type === 6) {
+                height = 18 * zoom;
+                baseColor = '#64748b';
+                roofColor = '#475569';
+            }
 
             ctx.fillStyle = baseColor;
             ctx.beginPath();
@@ -371,9 +435,39 @@
             ctx.lineTo(screen.x, screen.y + h - height);
             ctx.closePath();
             ctx.fill();
+
+            ctx.fillStyle = roofColor;
+            ctx.beginPath();
+            ctx.moveTo(screen.x, screen.y - height);
+            ctx.lineTo(screen.x + w / 2, screen.y + h / 2 - height);
+            ctx.lineTo(screen.x, screen.y + h - height);
+            ctx.lineTo(screen.x - w / 2, screen.y + h / 2 - height);
+            ctx.closePath();
+            ctx.fill();
         }
 
-        // Dibujar Aldeano
+        function drawTree(isoX, isoY) {
+            const screen = isoToScreen(isoX, isoY);
+            const w = TILE_WIDTH * zoom;
+            const h = TILE_HEIGHT * zoom;
+
+            if (loadedAssets["tree"]) {
+                const img = loadedAssets["tree"];
+                const imgW = w * 0.9;
+                const imgH = imgW * (img.height / img.width);
+                ctx.drawImage(img, screen.x - imgW / 2, screen.y + h - imgH, imgW, imgH);
+                return;
+            }
+
+            // Respaldo por código
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(screen.x - 3 * zoom, screen.y + 5 * zoom, 6 * zoom, 16 * zoom);
+            ctx.fillStyle = '#047857';
+            ctx.beginPath();
+            ctx.arc(screen.x, screen.y - 8 * zoom, 14 * zoom, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
         function drawVillager(v) {
             let currentX = v.x + (v.targetX - v.x) * v.progress;
             let currentY = v.y + (v.targetY - v.y) * v.progress;
@@ -381,12 +475,12 @@
 
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.beginPath();
-            ctx.ellipse(screen.x, screen.y + (TILE_HEIGHT / 2) * camera.zoom, 8 * camera.zoom, 4 * camera.zoom, 0, 0, Math.PI * 2);
+            ctx.ellipse(screen.x, screen.y + (TILE_HEIGHT / 2) * zoom, 8 * zoom, 4 * zoom, 0, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#f59e0b';
             ctx.beginPath();
-            ctx.arc(screen.x, screen.y + 5 * camera.zoom, 6 * camera.zoom, 0, Math.PI * 2);
+            ctx.arc(screen.x, screen.y + 4 * zoom, 6 * zoom, 0, Math.PI * 2);
             ctx.fill();
 
             v.progress += v.speed;
@@ -399,18 +493,18 @@
             }
         }
 
-        // Dibujar Cripto Token flotante
         function drawFloatingToken(token) {
             if (token.collected) return;
             const screen = isoToScreen(token.x, token.y);
             token.floatOffset = Math.sin(animationFrame * 0.1) * 6;
 
-            ctx.fillStyle = '#38bdf8';
+            const isCrypto = token.type === 'crypto';
+            ctx.fillStyle = isCrypto ? '#38bdf8' : '#f472b6';
             ctx.beginPath();
-            ctx.arc(screen.x, screen.y - (15 * camera.zoom) + token.floatOffset, 8 * camera.zoom, 0, Math.PI * 2);
+            ctx.arc(screen.x, screen.y - (15 * zoom) + token.floatOffset, 8 * zoom, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = '#bae6fd';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = isCrypto ? '#bae6fd' : '#fbcfe8';
+            ctx.lineWidth = 2 * zoom;
             ctx.stroke();
         }
 
@@ -421,130 +515,157 @@
             R = parseInt(R * (100 + percent) / 100);
             G = parseInt(G * (100 + percent) / 100);
             B = parseInt(B * (100 + percent) / 100);
-            return "#" + ((1 << 24) + (R << 16) + (G << 8) + B).toString(16).slice(1);
+            R = (R<255)?R:255; G = (G<255)?G:255; B = (B<255)?B:255;
+            let RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+            let GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+            let BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+            return "#"+RR+GG+BB;
         }
 
-        // Interacción del ratón y controles
         canvas.addEventListener('mousedown', (e) => {
-            if (e.button === 0) {
-                camera.isDragging = true;
-                camera.startX = e.clientX - camera.x;
-                camera.startY = e.clientY - camera.y;
-            }
+            isDragging = true;
+            dragStart.x = e.clientX - cameraOffset.x;
+            dragStart.y = e.clientY - cameraOffset.y;
         });
 
-        window.addEventListener('mousemove', (e) => {
+        canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+            mousePos.x = e.clientX - rect.left;
+            mousePos.y = e.clientY - rect.top;
 
-            if (camera.isDragging) {
-                camera.x = e.clientX - camera.startX;
-                camera.y = e.clientY - camera.startY;
+            if (isDragging) {
+                cameraOffset.x = e.clientX - dragStart.x;
+                cameraOffset.y = e.clientY - dragStart.y;
             } else {
-                hoverTile = screenToIso(mouseX, mouseY);
+                hoveredTile = screenToIso(mousePos.x, mousePos.y);
             }
         });
 
-        window.addEventListener('mouseup', () => {
-            camera.isDragging = false;
-        });
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
 
         canvas.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const zoomFactor = 1.1;
-            if (e.deltaY < 0) {
-                camera.zoom = Math.min(camera.zoom * zoomFactor, 2.0);
-            } else {
-                camera.zoom = Math.max(camera.zoom / zoomFactor, 0.6);
-            }
+            adjustZoom(e.deltaY < 0 ? 0.1 : -0.1);
         });
 
         canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+            const clickedIso = screenToIso(mousePos.x, mousePos.y);
 
-            // Recolección de Gemas
             floatingTokens.forEach(token => {
                 if (!token.collected) {
                     const screen = isoToScreen(token.x, token.y);
-                    const dist = Math.hypot(mouseX - screen.x, mouseY - (screen.y - 15));
-                    if (dist < 25) {
+                    const dist = Math.hypot(mousePos.x - screen.x, mousePos.y - (screen.y - 15 * zoom));
+                    if (dist < 25 * zoom) {
                         token.collected = true;
-                        cryptoTokens += 10;
-                        cryptoDisplay.innerText = cryptoTokens;
+                        if (token.type === 'crypto') {
+                            cryptoTokens += 15;
+                            cryptoDisplay.innerText = cryptoTokens;
+                        } else {
+                            elixirTokens += 10;
+                            elixirDisplay.innerText = elixirTokens;
+                        }
                         setTimeout(() => {
-                            token.x = Math.floor(Math.random() * MAP_SIZE);
-                            token.y = Math.floor(Math.random() * MAP_SIZE);
+                            token.x = Math.floor(Math.random() * (MAP_SIZE - 2)) + 1;
+                            token.y = Math.floor(Math.random() * (MAP_SIZE - 2)) + 1;
                             token.collected = false;
-                        }, 5000);
+                        }, 6000);
                     }
                 }
             });
 
-            // Construcción en el mapa
-            if (selectedBuildType !== 'select' && hoverTile.x >= 0 && hoverTile.x < MAP_SIZE && hoverTile.y >= 0 && hoverTile.y < MAP_SIZE) {
-                const costs = { '2': 50, '3': 20, '5': 30, '6': 5, '7': 40, '8': 45 };
-                const cost = costs[selectedBuildType] || 0;
+            if (selectedBuildType !== null) {
+                if (clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
+                    if (mapGrid[clickedIso.y][clickedIso.x] === 0) {
+                        const costs = { 2: 50, 3: 20, 5: 30, 6: 5 };
+                        const cost = costs[selectedBuildType] || 10;
 
-                if (mapGrid[hoverTile.y][hoverTile.x] === 0 && cryptoTokens >= cost) {
-                    mapGrid[hoverTile.y][hoverTile.x] = parseInt(selectedBuildType);
-                    cryptoTokens -= cost;
-                    cryptoDisplay.innerText = cryptoTokens;
+                        if (cryptoTokens >= cost) {
+                            cryptoTokens -= cost;
+                            cryptoDisplay.innerText = cryptoTokens;
+                            mapGrid[clickedIso.y][clickedIso.x] = selectedBuildType;
+                        } else {
+                            alert("¡No tienes suficiente Cripto para construir este edificio!");
+                        }
+                    }
                 }
             }
         });
 
-        // Eventos del Menú de Construcción
-        document.querySelectorAll('.build-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.build-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedBuildType = btn.getAttribute('data-type');
-            });
-        });
-
-        // Botón Web3 Wallet
-        document.getElementById('wallet-btn').addEventListener('click', () => {
-            if (typeof window.ethereum !== 'undefined') {
-                ethereum.request({ method: 'eth_requestAccounts' })
-                    .then(accounts => {
-                        document.getElementById('wallet-btn').innerText = `🦊 ${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`;
-                    })
-                    .catch(err => alert("Error conectando a Wallet"));
+        function selectBuildOption(type) {
+            selectedBuildType = type;
+            document.querySelectorAll('.build-btn').forEach(btn => btn.classList.remove('active'));
+            if (type !== null) {
+                const activeBtn = document.getElementById(`btn-build-${type}`);
+                if (activeBtn) activeBtn.classList.add('active');
+                modeBanner.style.display = 'block';
             } else {
-                alert("Instala MetaMask para conectar tu Wallet Web3");
+                modeBanner.style.display = 'none';
             }
-        });
+        }
 
-        // Bucle Principal del Juego
+        function adjustZoom(delta) {
+            zoom = Math.min(Math.max(0.5, zoom + delta), 2.2);
+        }
+
+        function toggleWallet() {
+            walletConnected = !walletConnected;
+            if (walletConnected) {
+                walletLabel.innerText = "0x71F...3A9";
+                walletBtn.classList.add('connected');
+            } else {
+                walletLabel.innerText = "Conectar Wallet";
+                walletBtn.classList.remove('connected');
+            }
+        }
+
+        function saveGame() {
+            localStorage.setItem('web3_isometric_village', JSON.stringify({
+                map: mapGrid,
+                crypto: cryptoTokens,
+                elixir: elixirTokens
+            }));
+            alert("💾 ¡Aldea y recursos guardados con éxito!");
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('web3_isometric_village');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    mapGrid = data.map;
+                    cryptoTokens = data.crypto;
+                    elixirTokens = data.elixir;
+                    cryptoDisplay.innerText = cryptoTokens;
+                    elixirDisplay.innerText = elixirTokens;
+                } catch(e) {}
+            }
+        }
+
         function gameLoop() {
             animationFrame++;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar Mapa
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
-                    drawTile(x, y, mapGrid[y][x]);
-                    
-                    if (hoverTile.x === x && hoverTile.y === y) {
-                        drawTileHighlight(x, y);
-                    }
+                    const tileType = mapGrid[y][x];
+                    drawTile(x, y, tileType);
 
-                    if (mapGrid[y][x] > 1) {
-                        drawBuilding(x, y, mapGrid[y][x]);
+                    if (tileType === 4) {
+                        drawTree(x, y);
+                    } else if (tileType > 1) {
+                        drawBuilding(x, y, tileType);
                     }
                 }
             }
 
-            // Elementos Dinámicos
             villagers.forEach(drawVillager);
             floatingTokens.forEach(drawFloatingToken);
 
             requestAnimationFrame(gameLoop);
         }
 
+        resizeCanvas();
+        loadGame();
         gameLoop();
     </script>
 </body>
