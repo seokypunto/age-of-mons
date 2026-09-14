@@ -299,9 +299,9 @@
         ];
 
         let villagers = [
-            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle', targetTreeX: null, targetTreeY: null, lastGatherTime: 0 },
-            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle', targetTreeX: null, targetTreeY: null, lastGatherTime: 0 },
-            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle', targetTreeX: null, targetTreeY: null, lastGatherTime: 0 }
+            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
+            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
+            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle', lastGatherTime: 0 }
         ];
 
         let selectedVillager = null;
@@ -421,16 +421,15 @@
                         v.x += (dx / dist) * v.speed;
                         v.y += (dy / dist) * v.speed;
                     } else {
-                        // Al llegar cerquita del árbol, cambia a estado gathering permanente
                         v.state = 'gathering';
                         v.lastGatherTime = now;
                     }
                 } else if (v.state === 'gathering') {
-                    // Cada 10 segundos exactos (10000 ms) suma 10 de madera en bucle infinito
                     if (now - v.lastGatherTime >= 10000) {
                         woodCount += 10;
                         woodDisplay.innerText = woodCount;
                         v.lastGatherTime = now;
+                        saveGame(); // Guarda automáticamente al recolectar madera
                     }
                 }
             });
@@ -524,6 +523,7 @@
                             elixirTokens += 10;
                             elixirDisplay.innerText = elixirTokens;
                         }
+                        saveGame();
                         setTimeout(() => {
                             token.x = Math.floor(Math.random() * (MAP_SIZE - 2)) + 1;
                             token.y = Math.floor(Math.random() * (MAP_SIZE - 2)) + 1;
@@ -534,7 +534,6 @@
             });
 
             if (selectedBuildType === null) {
-                // 1. Si hay un aldeano seleccionado y hacemos clic en un árbol, ponerlo en camino para talar
                 if (selectedVillager && clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
                     if (mapGrid[clickedIso.y][clickedIso.x] === 4) {
                         selectedVillager.targetX = clickedIso.x;
@@ -545,7 +544,6 @@
                     }
                 }
 
-                // 2. Comprobar si pinchamos un aldeano para seleccionarlo
                 let clickedVillager = villagers.find(v => {
                     const screen = isoToScreen(v.x, v.y);
                     return Math.hypot(mousePos.x - screen.x, mousePos.y - (screen.y + 4 * zoom)) < 20 * zoom;
@@ -569,6 +567,7 @@
                             cryptoTokens -= cost;
                             cryptoDisplay.innerText = cryptoTokens;
                             mapGrid[clickedIso.y][clickedIso.x] = selectedBuildType;
+                            saveGame();
                         } else {
                             alert("¡No tienes suficiente Cripto para construir este edificio!");
                         }
@@ -612,7 +611,6 @@
                 elixir: elixirTokens,
                 wood: woodCount
             }));
-            alert("💾 ¡Aldea y recursos guardados con éxito!");
         }
 
         function loadGame() {
@@ -620,10 +618,11 @@
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
-                    mapGrid = data.map;
-                    cryptoTokens = data.crypto;
-                    elixirTokens = data.elixir;
-                    woodCount = data.wood || 0;
+                    mapGrid = data.map || mapGrid;
+                    cryptoTokens = data.crypto !== undefined ? data.crypto : cryptoTokens;
+                    elixirTokens = data.elixir !== undefined ? data.elixir : elixirTokens;
+                    woodCount = data.wood !== undefined ? data.wood : woodCount;
+
                     cryptoDisplay.innerText = cryptoTokens;
                     elixirDisplay.innerText = elixirTokens;
                     woodDisplay.innerText = woodCount;
