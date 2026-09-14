@@ -299,9 +299,9 @@
         ];
 
         let villagers = [
-            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
-            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
-            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle', lastGatherTime: 0 }
+            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle', targetTreeX: null, targetTreeY: null, lastGatherTime: 0 },
+            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle', targetTreeX: null, targetTreeY: null, lastGatherTime: 0 },
+            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle', targetTreeX: null, targetTreeY: null, lastGatherTime: 0 }
         ];
 
         let selectedVillager = null;
@@ -412,24 +412,25 @@
         function updateVillagers() {
             const now = Date.now();
             villagers.forEach(v => {
-                let dx = v.targetX - v.x;
-                let dy = v.targetY - v.y;
-                let dist = Math.hypot(dx, dy);
+                if (v.state === 'moving_to_tree') {
+                    let dx = v.targetX - v.x;
+                    let dy = v.targetY - v.y;
+                    let dist = Math.hypot(dx, dy);
 
-                if (dist > 0.05) {
-                    v.x += (dx / dist) * v.speed;
-                    v.y += (dy / dist) * v.speed;
-                } else {
-                    v.x = v.targetX;
-                    v.y = v.targetY;
-
-                    // Si está talando, cada 10 segundos (10000ms) suma 10 de madera infinitamente
-                    if (v.state === 'gathering') {
-                        if (now - v.lastGatherTime >= 10000) {
-                            woodCount += 10;
-                            woodDisplay.innerText = woodCount;
-                            v.lastGatherTime = now;
-                        }
+                    if (dist > 0.4) {
+                        v.x += (dx / dist) * v.speed;
+                        v.y += (dy / dist) * v.speed;
+                    } else {
+                        // Al llegar cerquita del árbol, cambia a estado gathering permanente
+                        v.state = 'gathering';
+                        v.lastGatherTime = now;
+                    }
+                } else if (v.state === 'gathering') {
+                    // Cada 10 segundos exactos (10000 ms) suma 10 de madera en bucle infinito
+                    if (now - v.lastGatherTime >= 10000) {
+                        woodCount += 10;
+                        woodDisplay.innerText = woodCount;
+                        v.lastGatherTime = now;
                     }
                 }
             });
@@ -533,13 +534,12 @@
             });
 
             if (selectedBuildType === null) {
-                // 1. Si hacemos clic en un árbol teniendo un aldeano seleccionado, mandarlo a talar en bucle
+                // 1. Si hay un aldeano seleccionado y hacemos clic en un árbol, ponerlo en camino para talar
                 if (selectedVillager && clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
                     if (mapGrid[clickedIso.y][clickedIso.x] === 4) {
                         selectedVillager.targetX = clickedIso.x;
                         selectedVillager.targetY = clickedIso.y;
-                        selectedVillager.state = 'gathering';
-                        selectedVillager.lastGatherTime = Date.now(); // Empezar a contar el ciclo de tala
+                        selectedVillager.state = 'moving_to_tree';
                         selectedVillager = null;
                         return;
                     }
