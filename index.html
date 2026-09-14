@@ -30,6 +30,7 @@
             left: 20px;
             display: flex;
             gap: 15px;
+            z-index: 10;
         }
         .resource-box {
             background: rgba(15, 23, 42, 0.85);
@@ -65,16 +66,13 @@
 
         // 1. CARGA DE LA IMAGEN DEL ALDEANO DESDE GITHUB
         const villagerImg = new Image();
-        // Probamos con la ruta relativa directa o con public/ por si acaso
         villagerImg.src = 'public/images/villager.png';
         
         let imageLoaded = false;
         villagerImg.onload = function() {
             imageLoaded = true;
-            console.log("¡Sprite del aldeano cargado correctamente!");
         };
         villagerImg.onerror = function() {
-            // Si falla con 'public/', probamos directamente 'images/villager.png'
             villagerImg.src = 'images/villager.png';
         };
 
@@ -84,23 +82,20 @@
         const tileWidth = 64;
         const tileHeight = 32;
 
-        // Aldeanos simulados en el mapa
+        // Aldeanos en el mapa
         const villagers = [
-            { x: 3, y: 3, targetX: 3, targetY: 2, state: 'gathering' },
-            { x: 6, y: 4, targetX: 6, targetY: 5, state: 'gathering' },
-            { x: 2, y: 7, targetX: 2, targetY: 6, state: 'walking' }
+            { x: 3, y: 3 },
+            { x: 6, y: 4 },
+            { x: 2, y: 7 }
         ];
 
-        // Función para convertir coordenadas de matriz a coordenadas de pantalla isométrica
         function isoToScreen(isoX, isoY) {
             const screenX = canvas.width / 2 + (isoX - isoY) * (tileWidth / 2);
             const screenY = 150 + (isoX + isoY) * (tileHeight / 2);
             return { x: screenX, y: screenY };
         }
 
-        // Bucle principal de renderizado del juego
         function gameLoop() {
-            // Limpiar pantalla
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // 1. Dibujar el suelo isométrico (Casillas)
@@ -115,7 +110,6 @@
                     ctx.lineTo(screen.x - tileWidth / 2, screen.y + tileHeight / 2);
                     ctx.closePath();
 
-                    // Color de la baldosa (verde césped isométrico)
                     ctx.fillStyle = (x + y) % 2 === 0 ? '#10b981' : '#059669';
                     ctx.fill();
                     ctx.strokeStyle = '#047857';
@@ -124,26 +118,26 @@
                 }
             }
 
-            // 2. Dibujar elementos fijos (como árboles o edificios centrales)
-            // Árbol de ejemplo en (3, 2)
-            const treePos = isoToScreen(3, 2);
-            ctx.fillStyle = '#1e293b'; // Tronco / Base
-            ctx.fillRect(treePos.x - 6, treePos.y - 10, 12, 20);
-            ctx.fillStyle = '#065f46'; // Copas de los árboles
-            ctx.beginPath();
-            ctx.arc(treePos.x, treePos.y - 15, 16, 0, Math.PI * 2);
-            ctx.fill();
+            // 2. Dibujar árboles en el mapa
+            const treePositions = [{x: 3, y: 2}, {x: 6, y: 2}, {x: 2, y: 5}, {x: 7, y: 7}];
+            treePositions.forEach(t => {
+                const treePos = isoToScreen(t.x, t.y);
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(treePos.x - 6, treePos.y - 10, 12, 20);
+                ctx.fillStyle = '#065f46';
+                ctx.beginPath();
+                ctx.arc(treePos.x, treePos.y - 15, 16, 0, Math.PI * 2);
+                ctx.fill();
+            });
 
-            // 3. Dibujar los aldeanos
+            // 3. Dibujar los aldeanos usando tu imagen de cel-shading
             villagers.forEach(v => {
                 const pos = isoToScreen(v.x, v.y);
 
                 if (imageLoaded) {
-                    // DIBUJA TU SPRITE REAL DE GITHUB SI YA HA CARGADO
-                    // Ajustamos el tamaño a 48x48 píxeles centrado en la baldosa
-                    ctx.drawImage(villagerImg, pos.x - 24, pos.y - 36, 48, 48);
+                    // Dibuja tu sprite centrado en la baldosa isométrica
+                    ctx.drawImage(villagerImg, pos.x - 24, pos.y - 40, 48, 48);
                 } else {
-                    // Si por lo que sea la imagen está cargando, muestra un indicador temporal para que no quede vacío
                     ctx.fillStyle = '#38bdf8';
                     ctx.beginPath();
                     ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
@@ -154,7 +148,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Arrancar el juego
         gameLoop();
     </script>
 </body>
