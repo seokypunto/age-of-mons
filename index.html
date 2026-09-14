@@ -411,6 +411,8 @@
 
         function updateVillagers() {
             const now = Date.now();
+            let stateChanged = false;
+
             villagers.forEach(v => {
                 if (v.state === 'moving_to_tree') {
                     let dx = v.targetX - v.x;
@@ -420,19 +422,26 @@
                     if (dist > 0.4) {
                         v.x += (dx / dist) * v.speed;
                         v.y += (dy / dist) * v.speed;
+                        stateChanged = true;
                     } else {
                         v.state = 'gathering';
                         v.lastGatherTime = now;
+                        stateChanged = true;
                     }
                 } else if (v.state === 'gathering') {
                     if (now - v.lastGatherTime >= 10000) {
                         woodCount += 10;
                         woodDisplay.innerText = woodCount;
                         v.lastGatherTime = now;
-                        saveGame(); // Guarda automáticamente al recolectar madera
+                        saveGame();
                     }
                 }
             });
+
+            // Si los aldeanos se están moviendo, guardamos su posición continuamente de forma fluida
+            if (stateChanged && Math.random() < 0.1) {
+                saveGame();
+            }
         }
 
         function drawVillager(v) {
@@ -540,6 +549,7 @@
                         selectedVillager.targetY = clickedIso.y;
                         selectedVillager.state = 'moving_to_tree';
                         selectedVillager = null;
+                        saveGame();
                         return;
                     }
                 }
@@ -609,7 +619,8 @@
                 map: mapGrid,
                 crypto: cryptoTokens,
                 elixir: elixirTokens,
-                wood: woodCount
+                wood: woodCount,
+                villagers: villagers
             }));
         }
 
@@ -622,6 +633,10 @@
                     cryptoTokens = data.crypto !== undefined ? data.crypto : cryptoTokens;
                     elixirTokens = data.elixir !== undefined ? data.elixir : elixirTokens;
                     woodCount = data.wood !== undefined ? data.wood : woodCount;
+                    
+                    if (data.villagers && Array.isArray(data.villagers)) {
+                        villagers = data.villagers;
+                    }
 
                     cryptoDisplay.innerText = cryptoTokens;
                     elixirDisplay.innerText = elixirTokens;
