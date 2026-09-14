@@ -30,7 +30,7 @@
         const ctx = canvas.getContext('2d');
 
         const villager = new Image();
-        villager.src = 'public/images/villager.png';
+        villager.src = 'https://github.com/seokypunto/age-of-mons/blob/main/public/images/villager.png?raw=true';
 
         villager.onload = function () {
             ctx.drawImage(villager, 100, 100, 64, 64);
@@ -38,3 +38,9 @@
         };
 
         villager.onerror = function () {
+            console.error('No se pudo cargar la imagen del aldeano desde la URL de GitHub.');
+        };
+    </script>
+
+</body>
+</html>
