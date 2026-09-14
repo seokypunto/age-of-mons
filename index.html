@@ -239,7 +239,9 @@
             townhall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160"><ellipse cx="70" cy="142" rx="60" ry="16" fill="rgba(0,0,0,0.35)"/><path d="M70 15 L130 45 L70 75 L10 45 Z" fill="%231e293b"/><path d="M10 45 L70 75 L70 135 L10 105 Z" fill="%230f172a"/><path d="M70 75 L130 45 L130 105 L70 135 Z" fill="%231e293b"/><polygon points="70,0 80,20 70,25 60,20" fill="%2300f0ff"/></svg>',
             hut: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 120"><ellipse cx="55" cy="105" rx="45" ry="14" fill="rgba(0,0,0,0.3)"/><path d="M55 10 L100 32 L55 54 L10 32 Z" fill="%23334155"/><path d="M10 32 L55 54 L55 100 L10 78 Z" fill="%23475569"/><path d="M55 54 L100 32 L100 78 L55 100 Z" fill="%23334155"/></svg>',
             collector: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 120"><ellipse cx="55" cy="105" rx="42" ry="13" fill="rgba(0,0,0,0.3)"/><path d="M55 25 L90 42 L55 60 L20 42 Z" fill="%23db2777"/><path d="M20 42 L55 60 L55 95 L20 77 Z" fill="%23be185d"/><path d="M55 60 L90 42 L90 77 L55 95 Z" fill="%239d174d"/></svg>',
-            wall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 70"><ellipse cx="45" cy="60" rx="38" ry="10" fill="rgba(0,0,0,0.3)"/><path d="M45 12 L80 28 L45 44 L10 28 Z" fill="%23475569"/><path d="M10 28 L45 44 L45 60 L10 44 Z" fill="%23334155"/><path d="M45 44 L80 28 L80 44 L45 60 Z" fill="%231e293b"/></svg>'
+            wall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 70"><ellipse cx="45" cy="60" rx="38" ry="10" fill="rgba(0,0,0,0.3)"/><path d="M45 12 L80 28 L45 44 L10 28 Z" fill="%23475569"/><path d="M10 28 L45 44 L45 60 L10 44 Z" fill="%23334155"/><path d="M45 44 L80 28 L80 44 L45 60 Z" fill="%231e293b"/></svg>',
+            villager: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80"><ellipse cx="30" cy="73" rx="14" ry="5" fill="rgba(0,0,0,0.4)"/><circle cx="30" cy="22" r="10" fill="%23fcd34d"/><path d="M20 32 L40 32 L42 58 L18 58 Z" fill="%2338bdf8"/><path d="M22 58 L26 72 L30 72 L26 58 Z" fill="%231e293b"/><path d="M38 58 L34 72 L30 72 L34 58 Z" fill="%231e293b"/></svg>',
+            villager_axe: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 80"><ellipse cx="35" cy="73" rx="14" ry="5" fill="rgba(0,0,0,0.4)"/><circle cx="35" cy="22" r="10" fill="%23fcd34d"/><path d="M25 32 L45 32 L47 58 L23 58 Z" fill="%2338bdf8"/><path d="M45 28 L62 18 L58 35 Z" fill="%2394a3b8"/><rect x="52" y="24" width="3" height="12" fill="%2378350f" transform="rotate(25 52 24)"/></svg>'
         };
 
         const loadedAssets = {};
@@ -446,32 +448,41 @@
 
         function drawVillager(v) {
             const screen = isoToScreen(v.x, v.y);
+            const w = TILE_WIDTH * zoom;
+            const h = TILE_HEIGHT * zoom;
 
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.beginPath();
-            ctx.ellipse(screen.x, screen.y + (TILE_HEIGHT / 2) * zoom, 8 * zoom, 4 * zoom, 0, 0, Math.PI * 2);
-            ctx.fill();
+            let assetKey = "villager";
+            let bounceY = 0;
 
-            ctx.fillStyle = '#f59e0b';
-            ctx.beginPath();
-            ctx.arc(screen.x, screen.y + 4 * zoom, 6 * zoom, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5 * zoom;
-            ctx.stroke();
+            if (v.state === 'moving_to_tree') {
+                // Pequeño rebote al caminar
+                bounceY = Math.sin(animationFrame * 0.3) * 4 * zoom;
+            } else if (v.state === 'gathering') {
+                assetKey = "villager_axe";
+                // Simula el hachazo oscilando hacia adelante y atrás cada segundo
+                bounceY = Math.sin(animationFrame * 0.2) * 2 * zoom;
+            }
 
+            if (loadedAssets[assetKey]) {
+                const img = loadedAssets[assetKey];
+                const imgW = w * 0.9;
+                const imgH = imgW * (img.height / img.width);
+                ctx.drawImage(img, screen.x - imgW / 2, (screen.y + h - imgH) + bounceY, imgW, imgH);
+            }
+
+            // Anillo indicador si está seleccionado
             if (selectedVillager === v) {
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 2 * zoom;
                 ctx.beginPath();
-                ctx.arc(screen.x, screen.y + 4 * zoom, 10 * zoom, 0, Math.PI * 2);
+                ctx.arc(screen.x, screen.y + (h / 2), 12 * zoom, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
             if (v.state === 'gathering') {
-                ctx.font = `12px sans-serif`;
+                ctx.font = `bold 11px sans-serif`;
                 ctx.fillStyle = '#38bdf8';
-                ctx.fillText("🪓 Talando...", screen.x - 20 * zoom, screen.y - 12 * zoom);
+                ctx.fillText("🪓 Talando...", screen.x - 22 * zoom, screen.y - 10 * zoom);
             }
         }
 
@@ -556,7 +567,7 @@
 
                 let clickedVillager = villagers.find(v => {
                     const screen = isoToScreen(v.x, v.y);
-                    return Math.hypot(mousePos.x - screen.x, mousePos.y - (screen.y + 4 * zoom)) < 20 * zoom;
+                    return Math.hypot(mousePos.x - screen.x, mousePos.y - screen.y) < 25 * zoom;
                 });
 
                 if (clickedVillager) {
