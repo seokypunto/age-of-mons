@@ -427,6 +427,7 @@
                         v.state = 'gathering';
                         v.lastGatherTime = now;
                         stateChanged = true;
+                        saveGame();
                     }
                 } else if (v.state === 'gathering') {
                     if (now - v.lastGatherTime >= 10000) {
@@ -438,8 +439,7 @@
                 }
             });
 
-            // Si los aldeanos se están moviendo, guardamos su posición continuamente de forma fluida
-            if (stateChanged && Math.random() < 0.1) {
+            if (stateChanged && Math.random() < 0.2) {
                 saveGame();
             }
         }
@@ -620,7 +620,16 @@
                 crypto: cryptoTokens,
                 elixir: elixirTokens,
                 wood: woodCount,
-                villagers: villagers
+                villagers: villagers.map(v => ({
+                    id: v.id,
+                    x: v.x,
+                    y: v.y,
+                    targetX: v.targetX,
+                    targetY: v.targetY,
+                    speed: v.speed,
+                    state: v.state,
+                    lastGatherTime: v.lastGatherTime
+                }))
             }));
         }
 
@@ -629,10 +638,10 @@
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
-                    mapGrid = data.map || mapGrid;
-                    cryptoTokens = data.crypto !== undefined ? data.crypto : cryptoTokens;
-                    elixirTokens = data.elixir !== undefined ? data.elixir : elixirTokens;
-                    woodCount = data.wood !== undefined ? data.wood : woodCount;
+                    if (data.map) mapGrid = data.map;
+                    if (data.crypto !== undefined) cryptoTokens = data.crypto;
+                    if (data.elixir !== undefined) elixirTokens = data.elixir;
+                    if (data.wood !== undefined) woodCount = data.wood;
                     
                     if (data.villagers && Array.isArray(data.villagers)) {
                         villagers = data.villagers;
