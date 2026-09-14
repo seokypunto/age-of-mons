@@ -189,7 +189,7 @@
             <div class="stats-group">
                 <div class="badge">💎 CRIPTO: <span id="crypto-count">120</span></div>
                 <div class="badge">🧪 ELIXIR: <span id="elixir-count">45</span></div>
-                <div class="badge">🪵 MADERA: <span id="wood-count">0</span></div>
+                <div class="badge">⚡ ENERGÍA: <span id="energy-count">100%</span></div>
             </div>
             <button class="btn-web3" id="wallet-btn" onclick="toggleWallet()">
                 🦊 <span id="wallet-label">Conectar Wallet</span>
@@ -200,7 +200,7 @@
 
         <div class="ui-build-menu">
             <button class="build-btn" onclick="selectBuildOption(null)">
-                <span>🔍</span> Seleccionar / Aldeanos
+                <span>🔍</span> Navegar
             </button>
             <button class="build-btn" id="btn-build-2" onclick="selectBuildOption(2)">
                 <span>🏛️</span> Ayuntamiento
@@ -234,17 +234,20 @@
         const canvas = document.getElementById('isometricCanvas');
         const ctx = canvas.getContext('2d');
 
+        // =========================================================================
+        // CONFIGURACIÓN DE ASSETS / GRÁFICOS (SVG INCRUSTADOS DIRECTAMENTE EN CÓDIGO)
+        // Puedes cambiar estas URLs por tus propios archivos locales (ej. "assets/tree.png")
+        // =========================================================================
         const ASSETS_CONFIG = {
-            tree: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><ellipse cx="50" cy="110" rx="32" ry="11" fill="rgba(0,0,0,0.3)"/><path d="M46 75 L46 105 L54 105 L54 75 Z" fill="%235c3a21"/><circle cx="50" cy="45" r="32" fill="%23065f46"/><circle cx="38" cy="55" r="24" fill="%23047857"/><circle cx="62" cy="55" r="24" fill="%23047857"/><circle cx="50" cy="30" r="22" fill="%2310b981"/></svg>',
-            townhall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160"><ellipse cx="70" cy="142" rx="60" ry="16" fill="rgba(0,0,0,0.35)"/><path d="M70 15 L130 45 L70 75 L10 45 Z" fill="%231e293b"/><path d="M10 45 L70 75 L70 135 L10 105 Z" fill="%230f172a"/><path d="M70 75 L130 45 L130 105 L70 135 Z" fill="%231e293b"/><polygon points="70,0 80,20 70,25 60,20" fill="%2300f0ff"/></svg>',
-            hut: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 120"><ellipse cx="55" cy="105" rx="45" ry="14" fill="rgba(0,0,0,0.3)"/><path d="M55 10 L100 32 L55 54 L10 32 Z" fill="%23334155"/><path d="M10 32 L55 54 L55 100 L10 78 Z" fill="%23475569"/><path d="M55 54 L100 32 L100 78 L55 100 Z" fill="%23334155"/></svg>',
-            collector: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 120"><ellipse cx="55" cy="105" rx="42" ry="13" fill="rgba(0,0,0,0.3)"/><path d="M55 25 L90 42 L55 60 L20 42 Z" fill="%23db2777"/><path d="M20 42 L55 60 L55 95 L20 77 Z" fill="%23be185d"/><path d="M55 60 L90 42 L90 77 L55 95 Z" fill="%239d174d"/></svg>',
-            wall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 70"><ellipse cx="45" cy="60" rx="38" ry="10" fill="rgba(0,0,0,0.3)"/><path d="M45 12 L80 28 L45 44 L10 28 Z" fill="%23475569"/><path d="M10 28 L45 44 L45 60 L10 44 Z" fill="%23334155"/><path d="M45 44 L80 28 L80 44 L45 60 Z" fill="%231e293b"/></svg>',
-            villager: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80"><ellipse cx="30" cy="73" rx="14" ry="5" fill="rgba(0,0,0,0.4)"/><circle cx="30" cy="22" r="10" fill="%23fcd34d"/><path d="M20 32 L40 32 L42 58 L18 58 Z" fill="%2338bdf8"/><path d="M22 58 L26 72 L30 72 L26 58 Z" fill="%231e293b"/><path d="M38 58 L34 72 L30 72 L34 58 Z" fill="%231e293b"/></svg>',
-            villager_axe: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 80"><ellipse cx="35" cy="73" rx="14" ry="5" fill="rgba(0,0,0,0.4)"/><circle cx="35" cy="22" r="10" fill="%23fcd34d"/><path d="M25 32 L45 32 L47 58 L23 58 Z" fill="%2338bdf8"/><path d="M45 28 L62 18 L58 35 Z" fill="%2394a3b8"/><rect x="52" y="24" width="3" height="12" fill="%2378350f" transform="rotate(25 52 24)"/></svg>'
+            tree: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><ellipse cx="50" cy="110" rx="30" ry="10" fill="rgba(0,0,0,0.2)"/><rect x="44" y="70" width="12" height="35" rx="3" fill="%2378350f"/><polygon points="50,10 10,70 90,70" fill="%23047857"/><polygon points="50,25 20,75 80,75" fill="%2310b981"/><polygon points="50,40 30,85 70,85" fill="%2334d399"/></svg>',
+            townhall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><ellipse cx="60" cy="125" rx="55" ry="15" fill="rgba(0,0,0,0.3)"/><path d="M60 20 L110 45 L60 70 L10 45 Z" fill="%232563eb"/><path d="M10 45 L60 70 L60 120 L10 95 Z" fill="%231d4ed8"/><path d="M60 70 L110 45 L110 95 L60 120 Z" fill="%231e40af"/><polygon points="60,5 60,25 90,35 60,20" fill="%233b82f6"/><path d="M50 90 L70 100 L70 120 L50 110 Z" fill="%23fbbf24"/></svg>',
+            hut: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="40" ry="12" fill="rgba(0,0,0,0.25)"/><path d="M50 15 L90 35 L50 55 L10 35 Z" fill="%23a855f7"/><path d="M10 35 L50 55 L50 85 L10 65 Z" fill="%237e22ce"/><path d="M50 55 L90 35 L90 65 L50 85 Z" fill="%236b21a8"/><rect x="42" y="60" width="16" height="20" fill="%23fbbf24" rx="2"/></svg>',
+            collector: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="35" ry="10" fill="rgba(0,0,0,0.25)"/><path d="M50 20 L80 35 L50 50 L20 35 Z" fill="%23ec4899"/><path d="M20 35 L50 50 L50 80 L20 65 Z" fill="%23be185d"/><path d="M50 50 L80 35 L80 65 L50 80 Z" fill="%239d174d"/><polygon points="50,5 62,22 50,30 38,22" fill="%23f472b6"/></svg>',
+            wall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60"><path d="M40 10 L70 25 L40 40 L10 25 Z" fill="%2364748b"/><path d="M10 25 L40 40 L40 55 L10 40 Z" fill="%23475569"/><path d="M40 40 L70 25 L70 40 L40 55 Z" fill="%23334155"/></svg>'
         };
 
         const loadedAssets = {};
+
         function initAssets() {
             Object.keys(ASSETS_CONFIG).forEach(key => {
                 const src = ASSETS_CONFIG[key];
@@ -257,14 +260,12 @@
         }
         initAssets();
 
+        // Estado del Juego
         let cryptoTokens = 120;
         let elixirTokens = 45;
-        let woodCount = 0;
         let walletConnected = false;
-        
         const cryptoDisplay = document.getElementById('crypto-count');
         const elixirDisplay = document.getElementById('elixir-count');
-        const woodDisplay = document.getElementById('wood-count');
         const walletLabel = document.getElementById('wallet-label');
         const walletBtn = document.getElementById('wallet-btn');
         const modeBanner = document.getElementById('mode-banner');
@@ -301,12 +302,10 @@
         ];
 
         let villagers = [
-            { id: 1, x: 3, y: 3, targetX: 3, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
-            { id: 2, x: 8, y: 3, targetX: 8, targetY: 3, speed: 0.04, state: 'idle', lastGatherTime: 0 },
-            { id: 3, x: 3, y: 9, targetX: 3, targetY: 9, speed: 0.04, state: 'idle', lastGatherTime: 0 }
+            { x: 3, y: 4, targetX: 7, targetY: 4, progress: 0, speed: 0.006 },
+            { x: 8, y: 2, targetX: 8, targetY: 9, progress: 0, speed: 0.005 },
+            { x: 2, y: 10, targetX: 10, targetY: 10, progress: 0, speed: 0.007 }
         ];
-
-        let selectedVillager = null;
 
         let floatingTokens = [
             { x: 6, y: 6, floatOffset: 0, collected: false, type: 'crypto' },
@@ -339,8 +338,10 @@
         function screenToIso(screenX, screenY) {
             const unscaledX = (screenX - cameraOffset.x) / zoom;
             const unscaledY = (screenY - cameraOffset.y) / zoom;
+
             const isoX = (unscaledX / (TILE_WIDTH / 2) + unscaledY / (TILE_HEIGHT / 2)) / 2;
             const isoY = (unscaledY / (TILE_HEIGHT / 2) - unscaledX / (TILE_WIDTH / 2)) / 2;
+
             return { x: Math.floor(isoX), y: Math.floor(isoY) };
         }
 
@@ -392,10 +393,57 @@
 
             if (assetKey && loadedAssets[assetKey]) {
                 const img = loadedAssets[assetKey];
-                const imgW = w * 1.5;
-                const imgH = imgW * (img.height / img.width);
+                const imgW = w * 1.2;
+                const imgH = (w * 1.2) * (img.height / img.width);
                 ctx.drawImage(img, screen.x - imgW / 2, screen.y + h - imgH, imgW, imgH);
+                return;
             }
+
+            // Renderizado vectorial 3D como respaldo
+            let height = 35 * zoom;
+            let baseColor = '#8b5cf6';
+            let roofColor = '#6d28d9';
+
+            if (type === 2) {
+                height = 55 * zoom;
+                baseColor = '#3b82f6';
+                roofColor = '#1d4ed8';
+            } else if (type === 5) {
+                height = 30 * zoom;
+                baseColor = '#ec4899';
+                roofColor = '#be185d';
+            } else if (type === 6) {
+                height = 18 * zoom;
+                baseColor = '#64748b';
+                roofColor = '#475569';
+            }
+
+            ctx.fillStyle = baseColor;
+            ctx.beginPath();
+            ctx.moveTo(screen.x - w / 2, screen.y + h / 2);
+            ctx.lineTo(screen.x, screen.y + h);
+            ctx.lineTo(screen.x, screen.y + h - height);
+            ctx.lineTo(screen.x - w / 2, screen.y + h / 2 - height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = shadeColor(baseColor, -20);
+            ctx.beginPath();
+            ctx.moveTo(screen.x, screen.y + h);
+            ctx.lineTo(screen.x + w / 2, screen.y + h / 2);
+            ctx.lineTo(screen.x + w / 2, screen.y + h / 2 - height);
+            ctx.lineTo(screen.x, screen.y + h - height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = roofColor;
+            ctx.beginPath();
+            ctx.moveTo(screen.x, screen.y - height);
+            ctx.lineTo(screen.x + w / 2, screen.y + h / 2 - height);
+            ctx.lineTo(screen.x, screen.y + h - height);
+            ctx.lineTo(screen.x - w / 2, screen.y + h / 2 - height);
+            ctx.closePath();
+            ctx.fill();
         }
 
         function drawTree(isoX, isoY) {
@@ -405,84 +453,43 @@
 
             if (loadedAssets["tree"]) {
                 const img = loadedAssets["tree"];
-                const imgW = w * 1.3;
+                const imgW = w * 0.9;
                 const imgH = imgW * (img.height / img.width);
                 ctx.drawImage(img, screen.x - imgW / 2, screen.y + h - imgH, imgW, imgH);
+                return;
             }
-        }
 
-        function updateVillagers() {
-            const now = Date.now();
-            let stateChanged = false;
-
-            villagers.forEach(v => {
-                if (v.state === 'moving_to_tree') {
-                    let dx = v.targetX - v.x;
-                    let dy = v.targetY - v.y;
-                    let dist = Math.hypot(dx, dy);
-
-                    if (dist > 0.4) {
-                        v.x += (dx / dist) * v.speed;
-                        v.y += (dy / dist) * v.speed;
-                        stateChanged = true;
-                    } else {
-                        v.state = 'gathering';
-                        v.lastGatherTime = now;
-                        stateChanged = true;
-                        saveGame();
-                    }
-                } else if (v.state === 'gathering') {
-                    if (now - v.lastGatherTime >= 10000) {
-                        woodCount += 10;
-                        woodDisplay.innerText = woodCount;
-                        v.lastGatherTime = now;
-                        saveGame();
-                    }
-                }
-            });
-
-            if (stateChanged && Math.random() < 0.2) {
-                saveGame();
-            }
+            // Respaldo por código
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(screen.x - 3 * zoom, screen.y + 5 * zoom, 6 * zoom, 16 * zoom);
+            ctx.fillStyle = '#047857';
+            ctx.beginPath();
+            ctx.arc(screen.x, screen.y - 8 * zoom, 14 * zoom, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         function drawVillager(v) {
-            const screen = isoToScreen(v.x, v.y);
-            const w = TILE_WIDTH * zoom;
-            const h = TILE_HEIGHT * zoom;
+            let currentX = v.x + (v.targetX - v.x) * v.progress;
+            let currentY = v.y + (v.targetY - v.y) * v.progress;
+            const screen = isoToScreen(currentX, currentY);
 
-            let assetKey = "villager";
-            let bounceY = 0;
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(screen.x, screen.y + (TILE_HEIGHT / 2) * zoom, 8 * zoom, 4 * zoom, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-            if (v.state === 'moving_to_tree') {
-                // Pequeño rebote al caminar
-                bounceY = Math.sin(animationFrame * 0.3) * 4 * zoom;
-            } else if (v.state === 'gathering') {
-                assetKey = "villager_axe";
-                // Simula el hachazo oscilando hacia adelante y atrás cada segundo
-                bounceY = Math.sin(animationFrame * 0.2) * 2 * zoom;
-            }
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(screen.x, screen.y + 4 * zoom, 6 * zoom, 0, Math.PI * 2);
+            ctx.fill();
 
-            if (loadedAssets[assetKey]) {
-                const img = loadedAssets[assetKey];
-                const imgW = w * 0.9;
-                const imgH = imgW * (img.height / img.width);
-                ctx.drawImage(img, screen.x - imgW / 2, (screen.y + h - imgH) + bounceY, imgW, imgH);
-            }
-
-            // Anillo indicador si está seleccionado
-            if (selectedVillager === v) {
-                ctx.strokeStyle = '#38bdf8';
-                ctx.lineWidth = 2 * zoom;
-                ctx.beginPath();
-                ctx.arc(screen.x, screen.y + (h / 2), 12 * zoom, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-
-            if (v.state === 'gathering') {
-                ctx.font = `bold 11px sans-serif`;
-                ctx.fillStyle = '#38bdf8';
-                ctx.fillText("🪓 Talando...", screen.x - 22 * zoom, screen.y - 10 * zoom);
+            v.progress += v.speed;
+            if (v.progress >= 1) {
+                v.x = v.targetX;
+                v.y = v.targetY;
+                v.targetX = Math.floor(Math.random() * MAP_SIZE);
+                v.targetY = Math.floor(Math.random() * MAP_SIZE);
+                v.progress = 0;
             }
         }
 
@@ -499,6 +506,20 @@
             ctx.strokeStyle = isCrypto ? '#bae6fd' : '#fbcfe8';
             ctx.lineWidth = 2 * zoom;
             ctx.stroke();
+        }
+
+        function shadeColor(color, percent) {
+            let R = parseInt(color.substring(1,3),16);
+            let G = parseInt(color.substring(3,5),16);
+            let B = parseInt(color.substring(5,7),16);
+            R = parseInt(R * (100 + percent) / 100);
+            G = parseInt(G * (100 + percent) / 100);
+            B = parseInt(B * (100 + percent) / 100);
+            R = (R<255)?R:255; G = (G<255)?G:255; B = (B<255)?B:255;
+            let RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+            let GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+            let BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+            return "#"+RR+GG+BB;
         }
 
         canvas.addEventListener('mousedown', (e) => {
@@ -543,7 +564,6 @@
                             elixirTokens += 10;
                             elixirDisplay.innerText = elixirTokens;
                         }
-                        saveGame();
                         setTimeout(() => {
                             token.x = Math.floor(Math.random() * (MAP_SIZE - 2)) + 1;
                             token.y = Math.floor(Math.random() * (MAP_SIZE - 2)) + 1;
@@ -552,31 +572,6 @@
                     }
                 }
             });
-
-            if (selectedBuildType === null) {
-                if (selectedVillager && clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
-                    if (mapGrid[clickedIso.y][clickedIso.x] === 4) {
-                        selectedVillager.targetX = clickedIso.x;
-                        selectedVillager.targetY = clickedIso.y;
-                        selectedVillager.state = 'moving_to_tree';
-                        selectedVillager = null;
-                        saveGame();
-                        return;
-                    }
-                }
-
-                let clickedVillager = villagers.find(v => {
-                    const screen = isoToScreen(v.x, v.y);
-                    return Math.hypot(mousePos.x - screen.x, mousePos.y - screen.y) < 25 * zoom;
-                });
-
-                if (clickedVillager) {
-                    selectedVillager = clickedVillager;
-                    return;
-                } else {
-                    selectedVillager = null;
-                }
-            }
 
             if (selectedBuildType !== null) {
                 if (clickedIso.x >= 0 && clickedIso.x < MAP_SIZE && clickedIso.y >= 0 && clickedIso.y < MAP_SIZE) {
@@ -588,7 +583,6 @@
                             cryptoTokens -= cost;
                             cryptoDisplay.innerText = cryptoTokens;
                             mapGrid[clickedIso.y][clickedIso.x] = selectedBuildType;
-                            saveGame();
                         } else {
                             alert("¡No tienes suficiente Cripto para construir este edificio!");
                         }
@@ -599,7 +593,6 @@
 
         function selectBuildOption(type) {
             selectedBuildType = type;
-            selectedVillager = null;
             document.querySelectorAll('.build-btn').forEach(btn => btn.classList.remove('active'));
             if (type !== null) {
                 const activeBtn = document.getElementById(`btn-build-${type}`);
@@ -629,19 +622,9 @@
             localStorage.setItem('web3_isometric_village', JSON.stringify({
                 map: mapGrid,
                 crypto: cryptoTokens,
-                elixir: elixirTokens,
-                wood: woodCount,
-                villagers: villagers.map(v => ({
-                    id: v.id,
-                    x: v.x,
-                    y: v.y,
-                    targetX: v.targetX,
-                    targetY: v.targetY,
-                    speed: v.speed,
-                    state: v.state,
-                    lastGatherTime: v.lastGatherTime
-                }))
+                elixir: elixirTokens
             }));
+            alert("💾 ¡Aldea y recursos guardados con éxito!");
         }
 
         function loadGame() {
@@ -649,18 +632,11 @@
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
-                    if (data.map) mapGrid = data.map;
-                    if (data.crypto !== undefined) cryptoTokens = data.crypto;
-                    if (data.elixir !== undefined) elixirTokens = data.elixir;
-                    if (data.wood !== undefined) woodCount = data.wood;
-                    
-                    if (data.villagers && Array.isArray(data.villagers)) {
-                        villagers = data.villagers;
-                    }
-
+                    mapGrid = data.map;
+                    cryptoTokens = data.crypto;
+                    elixirTokens = data.elixir;
                     cryptoDisplay.innerText = cryptoTokens;
                     elixirDisplay.innerText = elixirTokens;
-                    woodDisplay.innerText = woodCount;
                 } catch(e) {}
             }
         }
@@ -668,8 +644,6 @@
         function gameLoop() {
             animationFrame++;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            updateVillagers();
 
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
